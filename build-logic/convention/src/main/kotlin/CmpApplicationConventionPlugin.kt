@@ -1,6 +1,5 @@
 import com.twugteam.admin.chirp.convention.applyHierarchyTemplate
 import com.twugteam.admin.chirp.convention.configureAndroidLibraryTarget
-import com.twugteam.admin.chirp.convention.configureDesktopTarget
 import com.twugteam.admin.chirp.convention.configureIosTargets
 import com.twugteam.admin.chirp.convention.libs
 import org.gradle.api.Plugin
@@ -23,7 +22,7 @@ class CmpApplicationConventionPlugin: Plugin<Project> {
 
             configureAndroidLibraryTarget()
             configureIosTargets()
-            configureDesktopTarget()
+//            configureDesktopTarget()
 
 
             extensions.configure<KotlinMultiplatformExtension> {

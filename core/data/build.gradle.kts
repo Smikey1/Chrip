@@ -22,6 +22,7 @@ kotlin {
                 implementation(projects.core.domain)
 
                 implementation(libs.bundles.ktor.common)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.touchlab.kermit)
                 implementation(libs.koin.core)
 
@@ -33,19 +34,19 @@ kotlin {
             }
         }
 
-        val jvmCommonMain by creating {
-            dependsOn(commonMain.get())
-        }
-
-        desktopMain {
-            dependsOn(jvmCommonMain)
-            dependencies {
-                implementation(libs.ktor.client.okhttp)
-            }
-        }
+//        val jvmCommonMain by creating {
+//            dependsOn(commonMain.get())
+//        }
+//
+//        desktopMain {
+//            dependsOn(jvmCommonMain)
+//            dependencies {
+//                implementation(libs.ktor.client.okhttp)
+//            }
+//        }
 
         androidMain {
-            dependsOn(jvmCommonMain)
+//            dependsOn(jvmCommonMain)
             dependencies {
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.koin.android)
