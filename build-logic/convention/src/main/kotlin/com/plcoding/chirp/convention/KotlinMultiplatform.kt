@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal fun Project.configureKotlinMultiplatform() {
     configureAndroidLibraryTarget()
-    configureDesktopTarget()
+//    configureDesktopTarget()
 
     extensions.configure<KotlinMultiplatformExtension> {
         listOf(
