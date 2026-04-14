@@ -1,0 +1,32 @@
+package com.twugteam.admin.core.designsystem.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+
+@Composable
+fun ChripTheme(
+    isDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (isDarkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
+    }
+
+    val extendedColorScheme = if (isDarkTheme) {
+        DarkExtendedColors
+    } else {
+        LightExtendedColors
+    }
+
+    CompositionLocalProvider(LocalExtendedColors provides extendedColorScheme){
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
+}
