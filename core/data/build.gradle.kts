@@ -22,6 +22,7 @@ kotlin {
                 implementation(projects.core.domain)
 
                 implementation(libs.bundles.ktor.common)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.touchlab.kermit)
                 implementation(libs.koin.core)
 
