@@ -20,7 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.twugteam.admin.core.designsystem.theme.ChripTheme
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 
 enum class ChripButtonStyle {
@@ -148,8 +148,8 @@ fun ChripButton(
 
 @Preview
 @Composable
-fun ChripButtonPreview() {
-    ChripTheme(
+fun ChirpButtonPreview() {
+    ChirpTheme(
         isDarkTheme = false
     ) {
         Column(

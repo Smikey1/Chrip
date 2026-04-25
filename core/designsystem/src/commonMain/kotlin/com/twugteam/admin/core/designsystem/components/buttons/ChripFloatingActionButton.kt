@@ -1,6 +1,5 @@
 package com.twugteam.admin.core.designsystem.components.buttons
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -11,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.twugteam.admin.core.designsystem.theme.ChripTheme
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 
 @Composable
 fun ChripFloatingActionButton(
@@ -31,9 +30,9 @@ fun ChripFloatingActionButton(
 
 @Preview
 @Composable
-private fun ChripFloatingActionButtonPreview() {
+private fun ChirpFloatingActionButtonPreview() {
 
-    ChripTheme {
+    ChirpTheme {
         ChripFloatingActionButton(
             modifier = Modifier,
             onClick = {},
