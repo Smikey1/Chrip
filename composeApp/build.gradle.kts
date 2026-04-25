@@ -1,8 +1,5 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
     alias(libs.plugins.convention.cmp.application)
-    alias(libs.plugins.conveyor)
 }
 
 version = "1.0.0"
@@ -62,10 +59,10 @@ kotlin {
     }
 }
 
-//compose.resources {
-//    packageOfResClass = "com.twugteam.admin.chirp"
-//}
-//
+compose.resources {
+    packageOfResClass = "com.twugteam.admin.chirp"
+}
+
 //compose.desktop {
 //    application {
 //        mainClass = "com.twugteam.admin.chirp.MainKt"
