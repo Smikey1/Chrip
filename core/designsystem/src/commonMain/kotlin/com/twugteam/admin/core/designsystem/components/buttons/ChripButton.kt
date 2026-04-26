@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +99,7 @@ fun ChripButton(
         ChripButtonStyle.DESTRUCTIVE_PRIMARY if !enabled -> defaultBorderStroke
         ChripButtonStyle.SECONDARY -> defaultBorderStroke
         ChripButtonStyle.DESTRUCTIVE_SECONDARY -> {
-            val borderColor = if(enabled){
+            val borderColor = if (enabled) {
                 MaterialTheme.colorScheme.extended.destructiveSecondaryOutline
             } else {
                 MaterialTheme.colorScheme.extended.disabledOutline
@@ -108,6 +109,7 @@ fun ChripButton(
                 color = borderColor
             )
         }
+
         else -> null
     }
     Button(
@@ -119,7 +121,8 @@ fun ChripButton(
         border = borderStroke
     ) {
         Box(
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(6.dp)
         ) {
             CircularProgressIndicator(
                 modifier = Modifier

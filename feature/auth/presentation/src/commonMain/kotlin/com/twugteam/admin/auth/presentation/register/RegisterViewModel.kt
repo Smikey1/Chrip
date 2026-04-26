@@ -32,6 +32,7 @@ class RegisterViewModel : ViewModel() {
     fun onAction(action: RegisterAction) {
         when (action) {
             RegisterAction.OnRegisterClick -> {}
+            else -> Unit
         }
     }
 }
