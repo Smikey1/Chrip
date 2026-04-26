@@ -98,9 +98,10 @@ private fun RegisterScreen(
             Spacer(modifier = Modifier.height(16.dp))
             ChirpPasswordTextField(
                 state = state.passwordTextState,
-                placeholder = stringResource(Res.string.password_hint),
+                placeholder = stringResource(Res.string.password),
                 title = stringResource(Res.string.password),
-                supportingText = state.passwordError?.asString(),
+                supportingText = state.passwordError?.asString()
+                    ?: stringResource(Res.string.password_hint),
                 isError = state.passwordError != null,
                 isPasswordVisible = state.isPasswordVisible,
                 onToggleVisibilityClick = {
