@@ -1,4 +1,4 @@
-package com.twugteam.admin.core.designsystem.components.logo
+package com.twugteam.admin.core.designsystem.components.icon
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme

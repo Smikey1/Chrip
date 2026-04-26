@@ -23,7 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.twugteam.admin.core.designsystem.components.logo.ChirpLogo
+import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
 import com.twugteam.admin.core.presentation.util.currentDeviceConfiguration
