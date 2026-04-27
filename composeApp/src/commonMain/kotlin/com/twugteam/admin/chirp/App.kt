@@ -8,6 +8,8 @@ import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 fun App(
 ) {
     ChirpTheme {
-        RegisterScreenRoot()
+        RegisterScreenRoot(
+            onRegisterSuccess = {}
+        )
     }
 }

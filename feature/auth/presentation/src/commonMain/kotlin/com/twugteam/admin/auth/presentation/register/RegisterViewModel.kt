@@ -1,6 +1,6 @@
 package com.twugteam.admin.auth.presentation.register
 
-import androidx.compose.ui.input.key.Key.Companion.R
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.auth.domain.EmailValidator
@@ -19,6 +19,10 @@ import com.twugteam.admin.core.presentation.util.toUiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -34,7 +38,7 @@ class RegisterViewModel(
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-
+                observeValidationState()
                 hasLoadedInitialData = true
             }
         }
@@ -58,19 +62,20 @@ class RegisterViewModel(
                     )
                 }
             }
+
             else -> Unit
         }
     }
 
     private fun register() {
-        if(!validateFormInput()){
+        if (!validateFormInput()) {
             return
         }
         viewModelScope.launch {
 
             _state.update {
                 it.copy(
-                    isRegistering = true
+                    isRegistering = true,
                 )
             }
 
@@ -90,9 +95,9 @@ class RegisterViewModel(
                 }
                 eventChannel.send(RegisterEvent.RegistrationSuccess(email))
             }.onFailure { error ->
-                val registrationError = when(error) {
+                val registrationError = when (error) {
                     DataError.Remote.CONFLICT -> UiText.Resource(Res.string.error_account_exists)
-                    else-> error.toUiText()
+                    else -> error.toUiText()
                 }
                 _state.update {
                     it.copy(
@@ -114,6 +119,47 @@ class RegisterViewModel(
             )
         }
     }
+
+
+    val usernameIsValidFlow = snapshotFlow {
+        state.value.usernameTextState.text.toString()
+    }.map {
+        it.length >= 3
+    }.distinctUntilChanged()
+    val emailIsValidFlow = snapshotFlow {
+        state.value.emailTextState.text.toString()
+    }.map {
+        EmailValidator.validate(it)
+    }.distinctUntilChanged()
+
+    val passwordIsValidFlow = snapshotFlow {
+        state.value.passwordTextState.text.toString()
+    }.map {
+        PasswordValidator.validate(it).isValidPassword
+    }.distinctUntilChanged()
+
+    val isRegisteringFlow = state
+        .map {
+            it.isRegistering
+        }
+        .distinctUntilChanged()
+
+    private fun observeValidationState() {
+        combine(
+            usernameIsValidFlow,
+            emailIsValidFlow,
+            passwordIsValidFlow,
+            isRegisteringFlow
+        ) { usernameIsValid, emailIsValid, passwordIsValid, isRegistering ->
+            _state.update {
+                it.copy(
+                    canRegister = !isRegistering && usernameIsValid && emailIsValid && passwordIsValid
+                )
+            }
+        }.launchIn(viewModelScope)
+
+    }
+
 
     private fun validateFormInput(): Boolean {
 
