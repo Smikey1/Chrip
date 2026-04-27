@@ -33,7 +33,7 @@ enum class ChripButtonStyle {
 }
 
 @Composable
-fun ChripButton(
+fun ChirpButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -162,31 +162,31 @@ fun ChirpButtonPreview() {
                 alignment = Alignment.CenterVertically
             ),
         ) {
-            ChripButton(
+            ChirpButton(
                 text = "Hello",
                 onClick = {},
                 modifier = Modifier,
                 style = ChripButtonStyle.PRIMARY
             )
-            ChripButton(
+            ChirpButton(
                 text = "Hello",
                 onClick = {},
                 modifier = Modifier,
                 style = ChripButtonStyle.DESTRUCTIVE_PRIMARY
             )
-            ChripButton(
+            ChirpButton(
                 text = "Hello",
                 onClick = {},
                 modifier = Modifier,
                 style = ChripButtonStyle.SECONDARY
             )
-            ChripButton(
+            ChirpButton(
                 text = "Hello",
                 onClick = {},
                 modifier = Modifier,
                 style = ChripButtonStyle.DESTRUCTIVE_SECONDARY
             )
-            ChripButton(
+            ChirpButton(
                 text = "Hello",
                 onClick = {},
                 modifier = Modifier,

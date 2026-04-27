@@ -22,7 +22,7 @@ import com.twugteam.admin.auth.presentation.username
 import com.twugteam.admin.auth.presentation.username_hint
 import com.twugteam.admin.auth.presentation.username_placeholder
 import com.twugteam.admin.auth.presentation.welcome_to_chirp
-import com.twugteam.admin.core.designsystem.components.buttons.ChripButton
+import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
 import com.twugteam.admin.core.designsystem.components.buttons.ChripButtonStyle
 import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
 import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveFormLayout
@@ -65,7 +65,7 @@ private fun RegisterScreen(
     snackbarHostState: SnackbarHostState,
 ) {
     ChirpScaffoldLayout(
-        snakbarHostState = snackbarHostState,
+        snackbarHostState = snackbarHostState,
         modifier = Modifier
             .fillMaxWidth()
     ) {
@@ -113,7 +113,7 @@ private fun RegisterScreen(
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ChripButton(
+            ChirpButton(
                 text = stringResource(Res.string.register),
                 onClick = {
                     onAction(RegisterAction.OnRegisterClick)
@@ -123,7 +123,7 @@ private fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ChripButton(
+            ChirpButton(
                 text = stringResource(Res.string.login),
                 onClick = {
                     onAction(RegisterAction.OnLoginClick)
