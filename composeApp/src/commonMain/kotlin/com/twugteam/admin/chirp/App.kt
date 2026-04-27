@@ -1,12 +1,13 @@
 package com.twugteam.admin.chirp
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.twugteam.admin.chirp.navigation.NavigationRoot
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 
 @Composable
-@Preview
 fun App(
 ) {
-    Text("Chrip Chat Messenger")
+    ChirpTheme {
+        NavigationRoot()
+    }
 }
