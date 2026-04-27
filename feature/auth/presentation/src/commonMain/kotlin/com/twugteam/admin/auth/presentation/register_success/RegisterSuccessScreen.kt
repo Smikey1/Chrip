@@ -29,7 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun RegisterSuccessRoot(
+fun RegisterSuccessScreenRoot(
     viewModel: RegisterSuccessViewModel = koinViewModel(),
     onLoginClick: () -> Unit
 ) {
@@ -68,7 +68,7 @@ fun RegisterSuccessRoot(
 }
 
 @Composable
-fun RegisterSuccessScreen(
+private fun RegisterSuccessScreen(
     state: RegisterSuccessState,
     onAction: (RegisterSuccessAction) -> Unit,
     snackbarHostState: SnackbarHostState
