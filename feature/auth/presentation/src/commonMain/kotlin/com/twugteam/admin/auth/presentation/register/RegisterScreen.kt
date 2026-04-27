@@ -37,7 +37,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterScreenRoot(
-    viewModel: RegisterViewModel = viewModel()
+    viewModel: RegisterViewModel = viewModel(),
+    onRegisterSuccess: (String) -> Unit
 ) {
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -46,7 +47,8 @@ fun RegisterScreenRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            else -> {}
+            RegisterEvent.RegistrationSuccess -> onRegisterSuccess(event)
+            else -> Unit
         }
     }
 
