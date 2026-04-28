@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.twugteam.admin.auth.presentation.Res
 import com.twugteam.admin.auth.presentation.email
 import com.twugteam.admin.auth.presentation.email_placeholder
@@ -37,7 +38,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun RegisterScreenRoot(
     viewModel: RegisterViewModel = koinViewModel(),
-    onRegisterSuccess: (String) -> Unit
+    onRegisterSuccess: (String) -> Unit,
+    onLoginClick: () -> Unit
 ) {
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -53,7 +55,13 @@ fun RegisterScreenRoot(
 
     RegisterScreen(
         state = state,
-        onAction = viewModel::onAction,
+        onAction = {action ->
+            when(action){
+                is RegisterAction.OnLoginClick -> onLoginClick()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        },
         snackbarHostState = snackbarHostState
     )
 }

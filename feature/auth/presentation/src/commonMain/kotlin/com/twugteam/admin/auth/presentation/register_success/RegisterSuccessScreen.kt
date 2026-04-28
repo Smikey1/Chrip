@@ -5,7 +5,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,7 +22,6 @@ import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveSucce
 import com.twugteam.admin.core.designsystem.components.layout.ChirpScaffoldLayout
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.ObserveAsEvents
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -37,19 +35,14 @@ fun RegisterSuccessScreenRoot(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val scope = rememberCoroutineScope()
-
-
     ObserveAsEvents(viewModel.events) { event ->
-        when(event) {
+        when (event) {
             is RegisterSuccessEvent.ResendVerificationEmailSuccess -> {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = getString(
-                            resource = Res.string.resent_verification_email
-                        )
+                snackbarHostState.showSnackbar(
+                    message = getString(
+                        resource = Res.string.resent_verification_email
                     )
-                }
+                )
             }
         }
     }
@@ -57,7 +50,7 @@ fun RegisterSuccessScreenRoot(
     RegisterSuccessScreen(
         state = state,
         onAction = { action ->
-            when(action) {
+            when (action) {
                 is RegisterSuccessAction.OnLoginClick -> onLoginClick()
                 else -> Unit
             }

@@ -1,5 +1,12 @@
 package com.twugteam.admin.auth.presentation.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -18,6 +25,9 @@ fun NavGraphBuilder.authGraph(
             RegisterScreenRoot(
                 onRegisterSuccess = { email ->
                     navController.navigate(AuthGraphRoute.RegisterSuccess(email))
+                },
+                onLoginClick = {
+                    navController.navigate(AuthGraphRoute.Login)
                 }
             )
         }
