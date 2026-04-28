@@ -18,7 +18,6 @@ import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
 import com.twugteam.admin.core.designsystem.components.buttons.ChripButtonStyle
 import com.twugteam.admin.core.designsystem.components.icon.ChirpSuccessIcon
 import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveResultLayout
-import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveSuccessLayout
 import com.twugteam.admin.core.designsystem.components.layout.ChirpScaffoldLayout
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.ObserveAsEvents
@@ -70,7 +69,7 @@ private fun RegisterSuccessScreen(
         snackbarHostState = snackbarHostState
     ) {
         ChirpAdaptiveResultLayout {
-            ChirpAdaptiveSuccessLayout(
+            ChirpAdaptiveResultLayout(
                 title = stringResource(Res.string.account_successfully_created),
                 description = stringResource(
                     Res.string.verification_email_sent_to_x,
