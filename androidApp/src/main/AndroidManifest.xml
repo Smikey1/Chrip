@@ -15,10 +15,43 @@
             android:exported="true"
             android:name="com.twugteam.admin.androidapp.MainActivity"
             android:windowSoftInputMode="adjustResize">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+            <!--  This is supposed to be production backend verification url endpoint
+            LIKE: https://example.com/api/auth/verify
+            -->
+                <data
+                    android:scheme="https"
+                    android:host="chrip.pl-coding.com"
+                    android:pathPrefix="/api/auth/verify"
+                    />
+
+            </intent-filter>
+
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <!--  This is supposed to be development custom app verification url endpoint
+                LIKE: chrip://example.com/api/auth/verify
+                -->
+                <data
+                    android:scheme="https"
+                    android:host="chrip.pl-coding.com"
+                    android:pathPrefix="/api/auth/verify"
+                    />
+
             </intent-filter>
 
         </activity>

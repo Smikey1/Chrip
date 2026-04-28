@@ -22,7 +22,7 @@ import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 
 @Composable
-fun ChirpAdaptiveSuccessLayout(
+fun ChirpAdaptiveResultLayout(
     title: String,
     description: String,
     icon: @Composable () -> Unit,
@@ -80,9 +80,9 @@ fun ChirpAdaptiveSuccessLayout(
 
 @Preview
 @Composable
-private fun ChirpAdaptiveSuccessLayoutPreview() {
+private fun ChirpAdaptiveResultLayoutPreview() {
     ChirpTheme(isDarkTheme = true) {
-        ChirpAdaptiveSuccessLayout(
+        ChirpAdaptiveResultLayout(
             modifier = Modifier.fillMaxSize(),
             title = "Register Success",
             description = "You can login now",
