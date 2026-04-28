@@ -1,8 +1,10 @@
 package com.twugteam.admin.auth.presentation.navigation
 
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.twugteam.admin.auth.presentation.email_verification.EmailVerificationRoot
 import com.twugteam.admin.auth.presentation.register.RegisterScreenRoot
@@ -34,7 +36,16 @@ fun NavGraphBuilder.authGraph(
             )
         }
 
-        composable<AuthGraphRoute.EmailVerification> {
+        composable<AuthGraphRoute.EmailVerification>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://chrip.pl-coding.com/api/auth/verify?token={token}"
+                },
+                navDeepLink {
+                    uriPattern = "chrip://chrip.pl-coding.com/api/auth/verify?token={token}"
+                }
+            )
+        ) {
             EmailVerificationRoot(
                 onLoginClick = {
                     navController.navigate(AuthGraphRoute.Login)
