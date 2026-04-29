@@ -8,10 +8,10 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>https</string>
-				<string>chrip</string>
+				<string>chirp</string>
 			</array>
 			<key>CFBundleURLName</key>
-			<string>chrip.pl-coding.com</string>
+			<string>chirp.pl-coding.com</string>
 		</dict>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
