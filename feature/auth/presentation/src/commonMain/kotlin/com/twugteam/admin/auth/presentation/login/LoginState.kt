@@ -1,7 +1,7 @@
-package com.plcoding.auth.presentation.login
+package com.twugteam.admin.auth.presentation.login
 
 import androidx.compose.foundation.text.input.TextFieldState
-import com.plcoding.core.presentation.util.UiText
+import com.twugteam.admin.core.presentation.util.UiText
 
 data class LoginState(
     val emailTextFieldState: TextFieldState = TextFieldState(),

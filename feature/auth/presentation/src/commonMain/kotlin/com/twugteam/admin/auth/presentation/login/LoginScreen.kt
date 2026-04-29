@@ -1,4 +1,4 @@
-package com.plcoding.auth.presentation.login
+package com.twugteam.admin.auth.presentation.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -12,28 +12,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import chirp.feature.auth.presentation.generated.resources.Res
-import chirp.feature.auth.presentation.generated.resources.create_account
-import chirp.feature.auth.presentation.generated.resources.email
-import chirp.feature.auth.presentation.generated.resources.email_placeholder
-import chirp.feature.auth.presentation.generated.resources.forgot_password
-import chirp.feature.auth.presentation.generated.resources.login
-import chirp.feature.auth.presentation.generated.resources.password
-import chirp.feature.auth.presentation.generated.resources.welcome_back
-import com.plcoding.core.designsystem.components.brand.ChirpBrandLogo
-import com.plcoding.core.designsystem.components.buttons.ChirpButton
-import com.plcoding.core.designsystem.components.buttons.ChirpButtonStyle
-import com.plcoding.core.designsystem.components.layouts.ChirpAdaptiveFormLayout
-import com.plcoding.core.designsystem.components.layouts.ChirpSnackbarScaffold
-import com.plcoding.core.designsystem.components.textfields.ChirpPasswordTextField
-import com.plcoding.core.designsystem.components.textfields.ChirpTextField
-import com.plcoding.core.designsystem.theme.ChirpTheme
-import com.plcoding.core.presentation.util.ObserveAsEvents
+import com.twugteam.admin.auth.presentation.Res
+import com.twugteam.admin.auth.presentation.create_account
+import com.twugteam.admin.auth.presentation.email
+import com.twugteam.admin.auth.presentation.email_placeholder
+import com.twugteam.admin.auth.presentation.forgot_password
+import com.twugteam.admin.auth.presentation.login
+import com.twugteam.admin.auth.presentation.password
+import com.twugteam.admin.auth.presentation.welcome_back
+import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
+import com.twugteam.admin.core.designsystem.components.buttons.ChripButtonStyle
+import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
+import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveFormLayout
+import com.twugteam.admin.core.designsystem.components.layout.ChirpScaffoldLayout
+import com.twugteam.admin.core.designsystem.components.textfields.ChirpPasswordTextField
+import com.twugteam.admin.core.designsystem.components.textfields.ChirpTextField
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
+import com.twugteam.admin.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -46,7 +45,7 @@ fun LoginRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.events) { event ->
-        when(event) {
+        when (event) {
             LoginEvent.Success -> onLoginSuccess()
         }
     }
@@ -54,7 +53,7 @@ fun LoginRoot(
     LoginScreen(
         state = state,
         onAction = { action ->
-            when(action) {
+            when (action) {
                 LoginAction.OnForgotPasswordClick -> onForgotPasswordClick()
                 LoginAction.OnSignUpClick -> onCreateAccountClick()
                 else -> Unit
@@ -69,12 +68,12 @@ fun LoginScreen(
     state: LoginState,
     onAction: (LoginAction) -> Unit,
 ) {
-    ChirpSnackbarScaffold {
+    ChirpScaffoldLayout {
         ChirpAdaptiveFormLayout(
             headerText = stringResource(Res.string.welcome_back),
             errorText = state.error?.asString(),
             logo = {
-                ChirpBrandLogo()
+                ChirpLogo()
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -129,7 +128,7 @@ fun LoginScreen(
                 onClick = {
                     onAction(LoginAction.OnSignUpClick)
                 },
-                style = ChirpButtonStyle.SECONDARY,
+                style = ChripButtonStyle.SECONDARY,
                 modifier = Modifier
                     .fillMaxWidth()
             )
@@ -151,7 +150,7 @@ private fun LightThemePreview() {
 @Preview
 @Composable
 private fun DarkThemePreview() {
-    ChirpTheme(darkTheme = true) {
+    ChirpTheme(isDarkTheme = true) {
         LoginScreen(
             state = LoginState(),
             onAction = {}

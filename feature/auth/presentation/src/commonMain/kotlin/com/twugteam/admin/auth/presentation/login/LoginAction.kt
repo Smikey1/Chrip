@@ -1,4 +1,4 @@
-package com.plcoding.auth.presentation.login
+package com.twugteam.admin.auth.presentation.login
 
 sealed interface LoginAction {
     data object OnTogglePasswordVisibility: LoginAction
