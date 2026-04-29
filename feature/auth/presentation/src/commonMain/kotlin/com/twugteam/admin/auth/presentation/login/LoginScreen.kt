@@ -36,7 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginRoot(
+fun LoginScreenRoot(
     viewModel: LoginViewModel = koinViewModel(),
     onLoginSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit,
@@ -64,7 +64,7 @@ fun LoginRoot(
 }
 
 @Composable
-fun LoginScreen(
+private fun LoginScreen(
     state: LoginState,
     onAction: (LoginAction) -> Unit,
 ) {
