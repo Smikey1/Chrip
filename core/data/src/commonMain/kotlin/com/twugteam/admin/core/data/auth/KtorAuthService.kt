@@ -1,13 +1,18 @@
 package com.twugteam.admin.core.data.auth
 
+import com.twugteam.admin.core.data.dto.LoginRequest
 import com.twugteam.admin.core.data.dto.RegisterRequest
 import com.twugteam.admin.core.data.dto.ResendEmailVerificationRequest
+import com.twugteam.admin.core.data.mapper.toDomain
 import com.twugteam.admin.core.data.networking.get
 import com.twugteam.admin.core.data.networking.post
+import com.twugteam.admin.core.domain.auth.AuthInfo
 import com.twugteam.admin.core.domain.auth.AuthService
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
+import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.asEmptyDataResult
+import com.twugteam.admin.core.domain.utils.map
 import io.ktor.client.HttpClient
 
 class KtorAuthService(
@@ -16,6 +21,7 @@ class KtorAuthService(
 
     companion object {
         private const val REGISTER_ENDPOINT = "/auth/register"
+        private const val LOGIN_ENDPOINT = "/auth/login"
         private const val RESEND_VERIFICATION_ENDPOINT = "/auth/resend-verification"
         private const val VERIFY_EMAIL_ENDPOINT = "/auth/verify"
     }
@@ -51,6 +57,18 @@ class KtorAuthService(
                 "token" to token
             )
         )
+    }
+
+    override suspend fun login(email: String, password: String): Result<AuthInfo, DataError.Remote> {
+        return httpClient.post<LoginRequest, AuthInfoSerializable>(
+            route = LOGIN_ENDPOINT,
+            body = LoginRequest(
+                email = email,
+                password = password
+            )
+        ).map {
+            it.toDomain()
+        }
     }
 
 }

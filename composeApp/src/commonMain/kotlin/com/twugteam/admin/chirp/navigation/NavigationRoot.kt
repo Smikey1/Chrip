@@ -17,7 +17,7 @@ fun NavigationRoot(
         authGraph(
             navController = navController,
             onLoginSuccess = {
-
+                // TODO #1: Navigate to Chat Graph Route and popup to Auth Graph
             }
         )
     }
