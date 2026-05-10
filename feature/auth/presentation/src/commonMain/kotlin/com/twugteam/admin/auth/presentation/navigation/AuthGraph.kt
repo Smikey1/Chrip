@@ -10,6 +10,7 @@ import com.twugteam.admin.auth.presentation.forgot_password.ForgotPasswordScreen
 import com.twugteam.admin.auth.presentation.login.LoginScreenRoot
 import com.twugteam.admin.auth.presentation.register.RegisterScreenRoot
 import com.twugteam.admin.auth.presentation.register_success.RegisterSuccessScreenRoot
+import com.twugteam.admin.auth.presentation.reset_password.ResetPasswordScreenRoot
 
 fun NavGraphBuilder.authGraph(
     navController: NavHostController,
@@ -78,9 +79,20 @@ fun NavGraphBuilder.authGraph(
         }
 
         composable<AuthGraphRoute.ForgotPassword> {
-            ForgotPasswordScreenRoot(
+            ForgotPasswordScreenRoot()
+        }
 
+        composable<AuthGraphRoute.ResetPassword>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://chirp.pl-coding.com/api/auth/reset-password?token={token}"
+                },
+                navDeepLink {
+                    uriPattern = "chirp://chirp.pl-coding.com/api/auth/reset-password?token={token}"
+                }
             )
+        ) {
+            ResetPasswordScreenRoot()
         }
     }
 }
