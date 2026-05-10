@@ -10,6 +10,7 @@ import com.twugteam.admin.chat.presentation.navigation.ChatGraphRoute
 import com.twugteam.admin.chirp.navigation.IOSDeepLinkListener
 import com.twugteam.admin.chirp.navigation.NavigationRoot
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
+import com.twugteam.admin.core.presentation.util.ObserveAsEvents
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -28,6 +29,16 @@ fun App(
     LaunchedEffect(state.isCheckingAuth) {
         if (!state.isCheckingAuth) {
             onAuthenticationChecked()
+        }
+    }
+
+    ObserveAsEvents(viewModel.events){ event ->
+        when (event){
+            MainEvent.OnSessionExpired -> navController.navigate(AuthGraphRoute.AuthGraph){
+                popUpTo(AuthGraphRoute.AuthGraph) {
+                    inclusive = false
+                }
+            }
         }
     }
 
