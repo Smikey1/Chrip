@@ -31,6 +31,7 @@ import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
+import com.twugteam.admin.core.presentation.util.clearFocusOnTapOutside
 import com.twugteam.admin.core.presentation.util.currentDeviceConfiguration
 
 @Composable
@@ -52,6 +53,7 @@ fun ChirpAdaptiveFormLayout(
         DeviceConfiguration.MOBILE_PORTRAIT -> {
             ChirpSurface(
                 modifier = modifier
+                    .clearFocusOnTapOutside()
                     .consumeWindowInsets(WindowInsets.navigationBars)
                     .consumeWindowInsets(WindowInsets.displayCutout),
                 header = {

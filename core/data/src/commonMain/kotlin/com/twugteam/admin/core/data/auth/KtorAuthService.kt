@@ -1,8 +1,10 @@
 package com.twugteam.admin.core.data.auth
 
+import com.twugteam.admin.core.data.dto.ForgotPasswordRequest
 import com.twugteam.admin.core.data.dto.LoginRequest
 import com.twugteam.admin.core.data.dto.RegisterRequest
 import com.twugteam.admin.core.data.dto.ResendEmailVerificationRequest
+import com.twugteam.admin.core.data.dto.ResetPasswordRequest
 import com.twugteam.admin.core.data.mapper.toDomain
 import com.twugteam.admin.core.data.networking.get
 import com.twugteam.admin.core.data.networking.post
@@ -24,6 +26,8 @@ class KtorAuthService(
         private const val LOGIN_ENDPOINT = "/auth/login"
         private const val RESEND_VERIFICATION_ENDPOINT = "/auth/resend-verification"
         private const val VERIFY_EMAIL_ENDPOINT = "/auth/verify"
+        private const val FORGOT_PASSWORD_ENDPOINT = "/auth/forgot-password"
+        private const val RESET_PASSWORD_ENDPOINT = "/auth/reset-password"
     }
 
     override suspend fun register(
@@ -59,7 +63,10 @@ class KtorAuthService(
         )
     }
 
-    override suspend fun login(email: String, password: String): Result<AuthInfo, DataError.Remote> {
+    override suspend fun login(
+        email: String,
+        password: String
+    ): Result<AuthInfo, DataError.Remote> {
         return httpClient.post<LoginRequest, AuthInfoSerializable>(
             route = LOGIN_ENDPOINT,
             body = LoginRequest(
@@ -69,6 +76,28 @@ class KtorAuthService(
         ).map {
             it.toDomain()
         }
+    }
+
+    override suspend fun forgotPassword(email: String): EmptyResult<DataError.Remote> {
+        return httpClient.post<ForgotPasswordRequest, Unit>(
+            route = FORGOT_PASSWORD_ENDPOINT,
+            body = ForgotPasswordRequest(
+                email = email
+            )
+        )
+    }
+
+    override suspend fun resetPassword(
+        newPassword: String,
+        token: String
+    ): EmptyResult<DataError.Remote> {
+        return httpClient.post(
+            route = RESET_PASSWORD_ENDPOINT,
+            body = ResetPasswordRequest(
+                newPassword = newPassword,
+                token = token
+            )
+        )
     }
 
 }

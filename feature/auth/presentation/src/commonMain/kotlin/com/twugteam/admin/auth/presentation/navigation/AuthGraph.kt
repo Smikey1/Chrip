@@ -6,9 +6,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.twugteam.admin.auth.presentation.email_verification.EmailVerificationRoot
+import com.twugteam.admin.auth.presentation.forgot_password.ForgotPasswordScreenRoot
 import com.twugteam.admin.auth.presentation.login.LoginScreenRoot
 import com.twugteam.admin.auth.presentation.register.RegisterScreenRoot
 import com.twugteam.admin.auth.presentation.register_success.RegisterSuccessScreenRoot
+import com.twugteam.admin.auth.presentation.reset_password.ResetPasswordScreenRoot
 
 fun NavGraphBuilder.authGraph(
     navController: NavHostController,
@@ -77,7 +79,20 @@ fun NavGraphBuilder.authGraph(
         }
 
         composable<AuthGraphRoute.ForgotPassword> {
+            ForgotPasswordScreenRoot()
+        }
 
+        composable<AuthGraphRoute.ResetPassword>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://chirp.pl-coding.com/api/auth/reset-password?token={token}"
+                },
+                navDeepLink {
+                    uriPattern = "chirp://chirp.pl-coding.com/api/auth/reset-password?token={token}"
+                }
+            )
+        ) {
+            ResetPasswordScreenRoot()
         }
     }
 }
