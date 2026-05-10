@@ -8,6 +8,7 @@ import com.twugteam.admin.auth.presentation.Res
 import com.twugteam.admin.auth.presentation.error_email_not_verified
 import com.twugteam.admin.auth.presentation.error_invalid_credentials
 import com.twugteam.admin.core.domain.auth.AuthService
+import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
@@ -27,7 +28,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -110,6 +112,9 @@ class LoginViewModel(
                 email = email,
                 password = password
             ).onSuccess { authInfo ->
+                sessionStorage.setAuthInfo(
+                    authInfo = authInfo
+                )
                 eventChannel.send(LoginEvent.Success)
             }.onFailure { error ->
                 val errorMessage = when (error){

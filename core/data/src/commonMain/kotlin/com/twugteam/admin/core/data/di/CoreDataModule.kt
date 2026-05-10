@@ -1,9 +1,11 @@
 package com.twugteam.admin.core.data.di
 
+import com.twugteam.admin.core.data.auth.EncryptedDataStoreSessionStorage
 import com.twugteam.admin.core.data.auth.KtorAuthService
 import com.twugteam.admin.core.data.logging.KermitLogger
 import com.twugteam.admin.core.data.networking.HttpClientFactory
 import com.twugteam.admin.core.domain.auth.AuthService
+import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.logging.ChripLogger
 import io.ktor.client.HttpClient
 import org.koin.core.module.Module
@@ -18,8 +20,10 @@ val coreDataModule = module {
     single<ChripLogger> { KermitLogger }
 
     single<HttpClient> {
-        HttpClientFactory(get()).create(get())
+        HttpClientFactory(get(), get()).create(get())
     }
 
     singleOf(::KtorAuthService) bind AuthService::class
+
+    singleOf(::EncryptedDataStoreSessionStorage) bind SessionStorage::class
 }
