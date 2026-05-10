@@ -48,6 +48,7 @@ moko = "0.20.1"
 buildkonfig = "0.18.0"
 conveyor = "2.0"
 kermit = "2.1.0"
+ksafe = "1.8.1"
 
 projectApplicationId = "com.twugteam.admin.chirp"
 projectVersionName = "1.0"
@@ -115,6 +116,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 
 # DataStore
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 # Material3 Adaptive
@@ -142,6 +144,9 @@ moko-permissions-notifications = { module = "dev.icerock.moko:permissions-notifi
 
 # Logging
 touchlab-kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+ksafe-compose = { module = "eu.anifantakis:ksafe-compose", version.ref = "ksafe" }
+ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 
 # Desktop
 jsystemthemedetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version.ref = "jsystemthemedetector" }
