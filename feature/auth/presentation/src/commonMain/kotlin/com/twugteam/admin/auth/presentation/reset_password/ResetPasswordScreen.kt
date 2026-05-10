@@ -19,9 +19,9 @@ import com.twugteam.admin.auth.presentation.reset_password_successfully
 import com.twugteam.admin.auth.presentation.set_new_password
 import com.twugteam.admin.auth.presentation.submit
 import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
-import com.twugteam.admin.core.designsystem.components.buttons.ChripButtonStyle
 import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
 import com.twugteam.admin.core.designsystem.components.layout.ChirpAdaptiveFormLayout
+import com.twugteam.admin.core.designsystem.components.layout.ChirpScaffoldLayout
 import com.twugteam.admin.core.designsystem.components.textfields.ChirpPasswordTextField
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
@@ -46,46 +46,48 @@ private fun ResetPasswordScreen(
     state: ResetPasswordState,
     onAction: (ResetPasswordAction) -> Unit
 ) {
-    ChirpAdaptiveFormLayout(
-        headerText = stringResource(Res.string.set_new_password),
-        errorText = state.errorText?.asString(),
-        logo = {
-            ChirpLogo()
-        }
-    ) {
-        ChirpPasswordTextField(
-            state = state.passwordTextFieldState,
-            modifier = Modifier
-                .fillMaxWidth(),
-            placeholder = stringResource(Res.string.password),
-            title = stringResource(Res.string.password),
-            supportingText = stringResource(Res.string.password_hint),
-            isPasswordVisible = state.isPasswordVisible,
-            onToggleVisibilityClick = {
-                onAction(ResetPasswordAction.OnTogglePasswordVisibilityClick)
+    ChirpScaffoldLayout {
+        ChirpAdaptiveFormLayout(
+            headerText = stringResource(Res.string.set_new_password),
+            errorText = state.errorText?.asString(),
+            logo = {
+                ChirpLogo()
             }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ChirpButton(
-            text = stringResource(Res.string.submit),
-            onClick = {
-                onAction(ResetPasswordAction.OnSubmitClick)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !state.isLoading && state.canSubmit,
-            isLoading = state.isLoading
-        )
-        if(state.isPasswordResetSuccessful) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(Res.string.reset_password_successfully),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.extended.success,
+        ) {
+            ChirpPasswordTextField(
+                state = state.passwordTextFieldState,
                 modifier = Modifier
                     .fillMaxWidth(),
-                textAlign = TextAlign.Center
+                placeholder = stringResource(Res.string.password),
+                title = stringResource(Res.string.password),
+                supportingText = stringResource(Res.string.password_hint),
+                isPasswordVisible = state.isPasswordVisible,
+                onToggleVisibilityClick = {
+                    onAction(ResetPasswordAction.OnTogglePasswordVisibilityClick)
+                }
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ChirpButton(
+                text = stringResource(Res.string.submit),
+                onClick = {
+                    onAction(ResetPasswordAction.OnSubmitClick)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoading && state.canSubmit,
+                isLoading = state.isLoading
+            )
+            if (state.isPasswordResetSuccessful) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(Res.string.reset_password_successfully),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.extended.success,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
