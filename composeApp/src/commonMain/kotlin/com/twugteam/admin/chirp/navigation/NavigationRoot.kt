@@ -11,17 +11,18 @@ import com.twugteam.admin.chat.presentation.navigation.ChatGraphRoute
 
 @Composable
 fun NavigationRoot(
+    startDestination: Any,
     navController: NavHostController
 ) {
     NavHost(
         navController = navController,
-        startDestination = AuthGraphRoute.AuthGraph
+        startDestination = startDestination
     ) {
         authGraph(
             navController = navController,
             onLoginSuccess = {
-                navController.navigate(ChatGraphRoute.ChatGraph){
-                    popUpTo(AuthGraphRoute.AuthGraph){
+                navController.navigate(ChatGraphRoute.ChatGraph) {
+                    popUpTo(AuthGraphRoute.AuthGraph) {
                         inclusive = true
                     }
                 }
