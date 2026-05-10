@@ -1,6 +1,7 @@
 package com.twugteam.admin.auth.presentation.di
 
 import com.twugteam.admin.auth.presentation.email_verification.EmailVerificationViewModel
+import com.twugteam.admin.auth.presentation.forgot_password.ForgotPasswordViewModel
 import com.twugteam.admin.auth.presentation.login.LoginViewModel
 import com.twugteam.admin.auth.presentation.register.RegisterViewModel
 import com.twugteam.admin.auth.presentation.register_success.RegisterSuccessViewModel
@@ -12,4 +13,5 @@ val authPresentationModule = module {
     viewModelOf(::RegisterSuccessViewModel)
     viewModelOf(::EmailVerificationViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::ForgotPasswordViewModel)
 }

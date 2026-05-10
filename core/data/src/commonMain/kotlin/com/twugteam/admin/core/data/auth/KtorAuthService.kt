@@ -1,5 +1,6 @@
 package com.twugteam.admin.core.data.auth
 
+import com.twugteam.admin.core.data.dto.ForgotPasswordRequest
 import com.twugteam.admin.core.data.dto.LoginRequest
 import com.twugteam.admin.core.data.dto.RegisterRequest
 import com.twugteam.admin.core.data.dto.ResendEmailVerificationRequest
@@ -14,6 +15,7 @@ import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.asEmptyDataResult
 import com.twugteam.admin.core.domain.utils.map
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
 
 class KtorAuthService(
     private val httpClient: HttpClient
@@ -24,6 +26,7 @@ class KtorAuthService(
         private const val LOGIN_ENDPOINT = "/auth/login"
         private const val RESEND_VERIFICATION_ENDPOINT = "/auth/resend-verification"
         private const val VERIFY_EMAIL_ENDPOINT = "/auth/verify"
+        private const val FORGOT_PASSWORD_ENDPOINT = "/auth/forgot-password"
     }
 
     override suspend fun register(
@@ -69,6 +72,15 @@ class KtorAuthService(
         ).map {
             it.toDomain()
         }
+    }
+
+    override suspend fun forgotPassword(email: String): EmptyResult<DataError.Remote> {
+        return httpClient.post<ForgotPasswordRequest, Unit>(
+            route = FORGOT_PASSWORD_ENDPOINT,
+            body = ForgotPasswordRequest(
+                email = email
+            )
+        )
     }
 
 }

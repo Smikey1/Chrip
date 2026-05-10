@@ -7,7 +7,6 @@ data class ForgotPasswordState(
     val emailTextFieldState: TextFieldState = TextFieldState(),
     val isLoading: Boolean = false,
     val errorText: UiText? = null,
-    val emailError: UiText? = null,
     val isEmailSentSuccessfully: Boolean = false,
     val canSubmit: Boolean = false
 )
