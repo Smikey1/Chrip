@@ -1,13 +1,13 @@
 [versions]
 # Build tools
-agp = "9.2.0"
-composeBom = "2026.04.01"
+agp = "9.2.1"
+composeBom = "2026.05.00"
 kotlin = "2.3.21"
 ksp = "2.3.6"
 google-services = "4.4.4"
 
 androidDesugarJdkLibs = "2.1.5"
-androidTools = "32.2.0"
+androidTools = "32.2.1"
 
 # Compose
 compose-multiplatform = "1.10.3"
@@ -28,9 +28,9 @@ appcompatVersion = "1.7.1"
 core-splashscreen = "1.2.0"
 
 # Kotlinx
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
-kotlinx-datetime = "0.7.1"
+kotlinx-datetime = "0.8.0"
 
 # Third party
 koin = "4.2.1"
@@ -38,14 +38,14 @@ ktor = "3.4.3"
 room = "2.8.4"
 sqlite = "2.6.2"
 datastore = "1.2.1"
-firebase-bom = "34.12.0"
+firebase-bom = "34.13.0"
 adaptive = "1.2.0"
 compose-material3 = "1.10.0-alpha05"
 jetbrains-savedstate = "1.4.0"
 coil = "3.4.0"
 coil-network = "3.4.0"
 moko = "0.20.1"
-buildkonfig = "0.18.0"
+buildkonfig = "0.20.0"
 conveyor = "2.0"
 kermit = "2.1.0"
 ksafe = "1.8.1"
