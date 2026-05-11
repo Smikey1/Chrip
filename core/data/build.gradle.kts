@@ -28,9 +28,12 @@ kotlin {
 
                 implementation(libs.datastore)
                 implementation(libs.datastore.preferences)
+                implementation(libs.datastore.core)
 
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.sqlite.bundled)
+
+                implementation(libs.ksafe)
             }
         }
 

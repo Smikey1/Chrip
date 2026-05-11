@@ -15,20 +15,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.twugteam.admin.core.designsystem.components.buttons.ChripButton
+import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
 import com.twugteam.admin.core.designsystem.components.buttons.ChripButtonStyle
 import com.twugteam.admin.core.designsystem.components.icon.ChirpSuccessIcon
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 
 @Composable
-fun ChirpAdaptiveSuccessLayout(
+fun ChirpAdaptiveResultLayout(
     title: String,
     description: String,
     icon: @Composable () -> Unit,
     primaryButton: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    secondaryButton: (@Composable () -> Unit)? = null
+    secondaryButton: (@Composable () -> Unit)? = null,
+    secondaryError: String? = null,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -60,6 +61,17 @@ fun ChirpAdaptiveSuccessLayout(
             if (secondaryButton != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 secondaryButton()
+                if (secondaryError != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = secondaryError,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -68,9 +80,9 @@ fun ChirpAdaptiveSuccessLayout(
 
 @Preview
 @Composable
-private fun ChirpAdaptiveSuccessLayoutPreview() {
+private fun ChirpAdaptiveResultLayoutPreview() {
     ChirpTheme(isDarkTheme = true) {
-        ChirpAdaptiveSuccessLayout(
+        ChirpAdaptiveResultLayout(
             modifier = Modifier.fillMaxSize(),
             title = "Register Success",
             description = "You can login now",
@@ -78,7 +90,7 @@ private fun ChirpAdaptiveSuccessLayoutPreview() {
                 ChirpSuccessIcon()
             },
             primaryButton = {
-                ChripButton(
+                ChirpButton(
                     onClick = {},
                     text = "Login",
                     style = ChripButtonStyle.PRIMARY,
@@ -86,7 +98,7 @@ private fun ChirpAdaptiveSuccessLayoutPreview() {
                 )
             },
             secondaryButton = {
-                ChripButton(
+                ChirpButton(
                     text = "Register",
                     onClick = {},
                     style = ChripButtonStyle.SECONDARY,

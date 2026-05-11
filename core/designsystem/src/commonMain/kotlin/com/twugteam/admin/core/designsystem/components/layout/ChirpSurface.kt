@@ -26,7 +26,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun ChirpSurface(
     modifier: Modifier = Modifier,
     header: @Composable ColumnScope.() -> Unit = {},
-    content: @Composable ColumnScope.() -> Unit = {}
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -34,7 +34,8 @@ fun ChirpSurface(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             header()
             Surface(
@@ -49,7 +50,7 @@ fun ChirpSurface(
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(horizontal = 16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
@@ -60,13 +61,13 @@ fun ChirpSurface(
     }
 }
 
-@Preview
 @Composable
-private fun ChirpSurfacePreview() {
-
+@Preview
+fun ChirpSurfacePreview() {
     ChirpTheme {
         ChirpSurface(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             header = {
                 Icon(
                     imageVector = vectorResource(Res.drawable.logo_chirp),
@@ -78,7 +79,7 @@ private fun ChirpSurfacePreview() {
             },
             content = {
                 Text(
-                    text = "Hello",
+                    text = "Welcome to Chirp!",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .padding(vertical = 40.dp)
@@ -86,7 +87,5 @@ private fun ChirpSurfacePreview() {
                 )
             }
         )
-
     }
-
 }

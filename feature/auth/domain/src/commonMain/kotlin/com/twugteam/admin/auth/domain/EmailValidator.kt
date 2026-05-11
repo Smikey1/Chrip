@@ -1,0 +1,10 @@
+package com.twugteam.admin.auth.domain
+
+object EmailValidator {
+    private const val REGEX_EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+
+    fun validate(email: String): Boolean {
+        return REGEX_EMAIL_PATTERN.toRegex().matches(email)
+    }
+
+}

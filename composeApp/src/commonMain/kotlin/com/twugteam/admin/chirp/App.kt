@@ -1,12 +1,57 @@
 package com.twugteam.admin.chirp
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
+import com.twugteam.admin.auth.presentation.navigation.AuthGraphRoute
+import com.twugteam.admin.chat.presentation.navigation.ChatGraphRoute
+import com.twugteam.admin.chirp.navigation.IOSDeepLinkListener
+import com.twugteam.admin.chirp.navigation.NavigationRoot
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
+import com.twugteam.admin.core.presentation.util.ObserveAsEvents
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-@Preview
 fun App(
+    onAuthenticationChecked: () -> Unit = {},
+    viewModel: MainViewModel = koinViewModel()
 ) {
-    Text("Chrip Chat Messenger")
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val navController = rememberNavController()
+
+    IOSDeepLinkListener(
+        navController = navController
+    )
+
+    LaunchedEffect(state.isCheckingAuth) {
+        if (!state.isCheckingAuth) {
+            onAuthenticationChecked()
+        }
+    }
+
+    ObserveAsEvents(viewModel.events){ event ->
+        when (event){
+            MainEvent.OnSessionExpired -> navController.navigate(AuthGraphRoute.AuthGraph){
+                popUpTo(AuthGraphRoute.AuthGraph) {
+                    inclusive = false
+                }
+            }
+        }
+    }
+
+    ChirpTheme {
+        if (!state.isCheckingAuth) {
+            NavigationRoot(
+                navController = navController,
+                startDestination = if (state.isLoggedIn) {
+                    ChatGraphRoute.ChatGraph
+                } else {
+                    AuthGraphRoute.AuthGraph
+                }
+            )
+        }
+    }
 }

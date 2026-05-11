@@ -85,7 +85,7 @@ suspend inline fun <reified Response> HttpClient.get(
     route: String,
     queryParams: Map<String, Any> = mapOf(),
     crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): Result<Response, DataError> {
+): Result<Response, DataError.Remote> {
     return safeCall {
         get {
             url(constructRoute(route))
@@ -102,7 +102,7 @@ suspend inline fun <reified Response> HttpClient.delete(
     route: String,
     queryParams: Map<String, Any> = mapOf(),
     crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): Result<Response, DataError> {
+): Result<Response, DataError.Remote> {
     return safeCall {
         delete {
             url(constructRoute(route))
