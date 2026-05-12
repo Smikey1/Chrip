@@ -32,7 +32,7 @@ import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
 import com.twugteam.admin.core.presentation.util.clearFocusOnTapOutside
-import com.twugteam.admin.core.presentation.util.currentDeviceConfiguration
+import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 
 @Composable
 fun ChirpAdaptiveFormLayout(
@@ -42,7 +42,7 @@ fun ChirpAdaptiveFormLayout(
     modifier: Modifier = Modifier,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
-    val configuration = currentDeviceConfiguration()
+    val configuration = getCurrentDeviceConfiguration()
     val headerColor = if (configuration == DeviceConfiguration.MOBILE_LANDSCAPE) {
         MaterialTheme.colorScheme.onBackground
     } else {

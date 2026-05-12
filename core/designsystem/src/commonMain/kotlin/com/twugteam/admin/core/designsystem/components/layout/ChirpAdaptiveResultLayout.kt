@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.dp
 import com.twugteam.admin.core.designsystem.components.icon.ChirpLogo
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
-import com.twugteam.admin.core.presentation.util.currentDeviceConfiguration
+import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 
 @Composable
 fun ChirpAdaptiveResultLayout(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val configuration = currentDeviceConfiguration()
+    val configuration = getCurrentDeviceConfiguration()
     Scaffold(
         modifier = modifier
     ) { innerPadding ->
