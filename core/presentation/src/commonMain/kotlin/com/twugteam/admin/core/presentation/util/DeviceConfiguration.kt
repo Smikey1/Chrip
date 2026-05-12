@@ -9,7 +9,7 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_L
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 
 @Composable
-fun currentDeviceConfiguration(): DeviceConfiguration {
+fun getCurrentDeviceConfiguration(): DeviceConfiguration {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     return DeviceConfiguration.fromWindowSizeClass(windowSizeClass)
 }
@@ -20,6 +20,10 @@ enum class DeviceConfiguration {
     TABLET_PORTRAIT,
     TABLET_LANDSCAPE,
     DESKTOP;
+
+
+    val isMobile: Boolean
+        get() = this in listOf(MOBILE_PORTRAIT, MOBILE_LANDSCAPE)
 
     companion object {
         fun fromWindowSizeClass(windowSizeClass: WindowSizeClass): DeviceConfiguration {
