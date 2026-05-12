@@ -21,8 +21,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.twugteam.admin.core.designsystem.theme.extended
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -38,6 +42,27 @@ fun ChatListDetailAdaptiveScreen(
     )
     val scope = rememberCoroutineScope()
 
+    val backEventState = rememberNavigationEventState(
+        currentInfo = NavigationEventInfo.None
+    )
+
+    NavigationBackHandler(
+        state = backEventState,
+        onBackCompleted = {
+            scope.launch {
+                scaffoldNavigator.navigateBack()
+            }
+        },
+        onBackCancelled = {
+            // Optional: handle when a swipe gesture is cancelled
+        }
+    )
+    // DEPRECATED
+//    BackHandler(enabled = scaffoldNavigator.canNavigateBack()) {
+//        scope.launch {
+//            scaffoldNavigator.navigateBack()
+//        }
+//    }
 
     ListDetailPaneScaffold(
         directive = scaffoldDirective,
