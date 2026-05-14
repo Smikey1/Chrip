@@ -7,6 +7,10 @@ kotlin {
         namespace = "com.twugteam.admin.feature.chat.presentation"
         compileSdk = 36
         minSdk = 26
+
+        androidResources {
+            enable = true
+        }
     }
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the

@@ -1,4 +1,4 @@
-package com.twugteam.admin.core.designsystem.chat
+package com.twugteam.admin.core.designsystem.components.chat
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect

@@ -1,6 +1,6 @@
 package com.twugteam.admin.core.designsystem.components.avatar
 
-data class AvatarUi(
+data class ChatParticipantUi(
     val userId: String,
     val username: String,
     val imageUrl: String? = null
