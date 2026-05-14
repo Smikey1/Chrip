@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.presentation.components.ChatParticipantSearchTextSection
 import com.twugteam.admin.chat.presentation.components.ChatParticipantSelectionSection
 import com.twugteam.admin.chat.presentation.components.ManageChatButtonSection
@@ -29,6 +29,7 @@ import com.twugteam.admin.core.designsystem.components.dialogs.ChirpAdaptiveDial
 import com.twugteam.admin.core.designsystem.components.divider.ChirpHorizontalDivider
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
+import com.twugteam.admin.core.presentation.util.ObserveAsEvents
 import com.twugteam.admin.core.presentation.util.clearFocusOnTapOutside
 import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 import com.twugteam.admin.feature.chat.presentation.Res
@@ -40,17 +41,24 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CreateChatScreenRoot(
     onDismiss: () -> Unit,
+    onChatCreated: (Chat) -> Unit,
     viewModel: CreateChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is CreateChatEvent.ChatCreated -> onChatCreated(event.chat)
+        }
+    }
 
     ChirpAdaptiveDialogSheetLayout(
         onDismiss = onDismiss
     ) {
         CreateChatScreen(
             state = state,
-            onAction = {action ->
-                when(action){
+            onAction = { action ->
+                when (action) {
                     CreateChatAction.OnDismissDialog -> onDismiss()
                     else -> Unit
                 }
@@ -119,6 +127,7 @@ private fun CreateChatScreen(
         ChirpHorizontalDivider()
         ManageChatButtonSection(
             modifier = Modifier.fillMaxWidth(),
+            error = state.createChatError?.asString(),
             primaryButton = {
                 ChirpButton(
                     text = stringResource(Res.string.create_chat),

@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.chat.domain.chat.ChatParticipantService
+import com.twugteam.admin.chat.domain.chat.ChatService
 import com.twugteam.admin.chat.presentation.mappers.toUi
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.onFailure
@@ -29,7 +30,8 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 class CreateChatViewModel(
-    private val chatParticipantService: ChatParticipantService
+    private val chatParticipantService: ChatParticipantService,
+    private val chatService: ChatService
 ) : ViewModel() {
 
     var hasLoadedInitialData: Boolean = false
@@ -61,10 +63,8 @@ class CreateChatViewModel(
     fun onAction(action: CreateChatAction) {
         when (action) {
             CreateChatAction.OnAddParticipantClick -> addParticipant()
-            CreateChatAction.OnCreateChatClick -> {
-
-            }
-            CreateChatAction.OnDismissDialog -> Unit
+            CreateChatAction.OnCreateChatClick -> createChat()
+            else -> Unit
         }
     }
 
@@ -83,6 +83,43 @@ class CreateChatViewModel(
                 }
                 _state.value.searchQueryTextState.clearText()
             }
+        }
+    }
+
+    private fun createChat() {
+        val userIds = state.value.selectedChatParticipants.map {
+            it.userId
+        }
+        if(userIds.isEmpty()){
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isCreatingChat = true,
+                    canAddParticipant = false
+                )
+            }
+            chatService
+                .createChat(userIds)
+                .onSuccess {  chat ->
+                    _state.update {
+                        it.copy(
+                            isCreatingChat = false
+                        )
+                    }
+                    eventChannel.send(CreateChatEvent.ChatCreated(chat))
+                }
+                .onFailure {error ->
+                    _state.update {
+                        it.copy(
+                            isCreatingChat = false,
+                            createChatError = error.toUiText(),
+                            canAddParticipant = it.currentSearchResult != null && !it.isSearching
+                        )
+                    }
+                }
         }
     }
 
