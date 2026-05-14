@@ -1,6 +1,7 @@
 package com.twugteam.admin.chirp.di
 
 import com.twugteam.admin.auth.presentation.di.authPresentationModule
+import com.twugteam.admin.chat.data.di.chatDataModule
 import com.twugteam.admin.chat.presentation.di.chatPresentationModule
 import com.twugteam.admin.core.data.di.coreDataModule
 import com.twugteam.admin.core.presentation.di.corePresentationModule
@@ -15,7 +16,8 @@ fun initKoin(config: KoinAppDeclaration? = null) {
             corePresentationModule,
             coreDataModule,
             authPresentationModule,
-            chatPresentationModule
+            chatPresentationModule,
+            chatDataModule
         )
     }
 }

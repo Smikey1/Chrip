@@ -112,7 +112,9 @@ fun ChatListDetailAdaptiveScreen(
         visible = state.dialogState is DialogState.CreateChat
     ) {
         CreateChatScreenRoot(
-
+            onDismiss = {
+                viewModel.onAction(ChatListDetailAction.OnDismissClick)
+            }
         )
     }
 }

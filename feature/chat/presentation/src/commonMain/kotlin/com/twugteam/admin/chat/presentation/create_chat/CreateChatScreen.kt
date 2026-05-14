@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.twugteam.admin.chat.presentation.components.ChatParticipantSearchTextSection
 import com.twugteam.admin.chat.presentation.components.ChatParticipantSelectionSection
 import com.twugteam.admin.chat.presentation.components.ManageChatButtonSection
@@ -38,18 +39,23 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CreateChatScreenRoot(
+    onDismiss: () -> Unit,
     viewModel: CreateChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ChirpAdaptiveDialogSheetLayout(
-        onDismiss = {
-            viewModel.onAction(CreateChatAction.OnDismissDialog)
-        }
+        onDismiss = onDismiss
     ) {
         CreateChatScreen(
             state = state,
-            onAction = viewModel::onAction
+            onAction = {action ->
+                when(action){
+                    CreateChatAction.OnDismissDialog -> onDismiss()
+                    else -> Unit
+                }
+                viewModel.onAction(action)
+            }
         )
     }
 }
@@ -94,7 +100,7 @@ private fun CreateChatScreen(
         ChatParticipantSearchTextSection(
             searchQueryState = state.searchQueryTextState,
             isSearchEnabled = state.canAddParticipant,
-            isLoading = state.isAddingParticipant,
+            isLoading = state.isSearching,
             modifier = Modifier.fillMaxWidth(),
             error = state.searchError,
             onFocusChanged = {
