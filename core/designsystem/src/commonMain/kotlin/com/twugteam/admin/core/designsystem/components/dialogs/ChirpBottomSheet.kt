@@ -24,14 +24,15 @@ fun ChirpBottomSheet(
         skipPartiallyExpanded = true
     )
 
-    LaunchedEffect(sheetState.isVisible){
-        if (sheetState.isVisible){
+    LaunchedEffect(sheetState.isVisible) {
+        if (sheetState.isVisible) {
             sheetState.expand()
         }
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        sheetState = sheetState,
         dragHandle = null,
         contentWindowInsets = {
             WindowInsets()

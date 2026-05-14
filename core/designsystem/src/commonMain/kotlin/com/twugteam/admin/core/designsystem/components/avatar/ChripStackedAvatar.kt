@@ -12,7 +12,7 @@ import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 
 @Composable
 fun ChripStackedAvatar(
-    avatars: List<AvatarUi>,
+    avatars: List<ChatParticipantUi>,
     modifier: Modifier = Modifier,
     size: AvatarSize = AvatarSize.SMALL,
     maxVisibleAvatarCount: Int = 2,
@@ -50,7 +50,7 @@ private fun ChripStackedAvatarPreview() {
     ChirpTheme {
         ChripStackedAvatar(
             avatars = (1..5).map {
-                AvatarUi(
+                ChatParticipantUi(
                     userId = it.toString(),
                     username = "U$it",
                 )
