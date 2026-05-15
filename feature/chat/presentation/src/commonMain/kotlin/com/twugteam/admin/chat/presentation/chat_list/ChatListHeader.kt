@@ -40,7 +40,7 @@ import com.twugteam.admin.core.designsystem.Res as DesignSystemRes
 
 @Composable
 fun ChatListHeader(
-    localParticipant: ChatParticipantUi,
+    localParticipant: ChatParticipantUi?,
     isUserMenuOpen: Boolean,
     onUserAvatarClick: () -> Unit,
     onProfileSettingClick: () -> Unit,
@@ -83,7 +83,7 @@ fun ChatListHeader(
 
 @Composable
 fun ProfileAvatarSection(
-    localParticipant: ChatParticipantUi,
+    localParticipant: ChatParticipantUi?,
     isUserMenuOpen: Boolean,
     onUserAvatarClick: () -> Unit,
     onProfileSettingClick: () -> Unit,
@@ -94,68 +94,70 @@ fun ProfileAvatarSection(
     Box(
         modifier = modifier
     ) {
-        ChripAvatarPhoto(
-            displayInitialText = localParticipant.initial,
-            imageUrl = localParticipant.imageUrl,
-            onProfileClick = onProfileSettingClick
-        )
-        DropdownMenu(
-            expanded = isUserMenuOpen,
-            onDismissRequest = onDismissClick,
-            shape = RoundedCornerShape(16.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.extended.surfaceOutline
+        if (localParticipant != null) {
+            ChripAvatarPhoto(
+                displayInitialText = localParticipant.initial,
+                imageUrl = localParticipant.imageUrl,
+                onProfileClick = onUserAvatarClick
             )
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    onDismissClick()
-                    onProfileSettingClick()
-                },
-                text = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(DesignSystemRes.drawable.settings_icon),
-                            contentDescription = stringResource(Res.string.profile_settings),
-                            tint = MaterialTheme.colorScheme.extended.textSecondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.profile_settings),
-                            color = MaterialTheme.colorScheme.extended.textSecondary,
-                            fontWeight = FontWeight.Medium
-                        )
+            DropdownMenu(
+                expanded = isUserMenuOpen,
+                onDismissRequest = onDismissClick,
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.extended.surfaceOutline
+                )
+            ) {
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissClick()
+                        onProfileSettingClick()
+                    },
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(DesignSystemRes.drawable.settings_icon),
+                                contentDescription = stringResource(Res.string.profile_settings),
+                                tint = MaterialTheme.colorScheme.extended.textSecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(Res.string.profile_settings),
+                                color = MaterialTheme.colorScheme.extended.textSecondary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
-                }
-            )
-            ChirpHorizontalDivider()
-            DropdownMenuItem(
-                onClick = {
-                    onDismissClick()
-                    onLogoutClick()
-                },
-                text = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(DesignSystemRes.drawable.log_out_icon),
-                            contentDescription = stringResource(Res.string.logout),
-                            tint = MaterialTheme.colorScheme.extended.destructiveHover,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.logout),
-                            color = MaterialTheme.colorScheme.extended.destructiveHover,
-                            fontWeight = FontWeight.Medium
-                        )
+                )
+                ChirpHorizontalDivider()
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissClick()
+                        onLogoutClick()
+                    },
+                    text = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = vectorResource(DesignSystemRes.drawable.log_out_icon),
+                                contentDescription = stringResource(Res.string.logout),
+                                tint = MaterialTheme.colorScheme.extended.destructiveHover,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(Res.string.logout),
+                                color = MaterialTheme.colorScheme.extended.destructiveHover,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
