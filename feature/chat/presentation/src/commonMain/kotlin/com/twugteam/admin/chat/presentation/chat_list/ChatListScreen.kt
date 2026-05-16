@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twugteam.admin.chat.presentation.chat_list.components.ChatListHeader
 import com.twugteam.admin.chat.presentation.chat_list.components.ChatListItemUi
-import com.twugteam.admin.chat.presentation.chat_list.components.EmptyChatSection
+import com.twugteam.admin.chat.presentation.components.EmptySection
 import com.twugteam.admin.chat.presentation.model.ChatUi
 import com.twugteam.admin.core.designsystem.components.buttons.ChripFloatingActionButton
 import com.twugteam.admin.core.designsystem.components.dialogs.DestructiveConfirmationDialog
@@ -41,6 +41,8 @@ import com.twugteam.admin.feature.chat.presentation.create_chat
 import com.twugteam.admin.feature.chat.presentation.do_you_want_to_logout
 import com.twugteam.admin.feature.chat.presentation.do_you_want_to_logout_desc
 import com.twugteam.admin.feature.chat.presentation.logout
+import com.twugteam.admin.feature.chat.presentation.no_chats
+import com.twugteam.admin.feature.chat.presentation.no_chats_subtitle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -130,11 +132,13 @@ private fun ChatListScreen(
                 )
 
                 state.chats.isEmpty() -> {
-                    EmptyChatSection(
+                    EmptySection(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 8.dp),
+                        title = stringResource(Res.string.no_chats),
+                        description = stringResource(Res.string.no_chats_subtitle)
                     )
                 }
 

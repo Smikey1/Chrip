@@ -1,4 +1,4 @@
-package com.twugteam.admin.chat.presentation.chat_list.components
+package com.twugteam.admin.chat.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -19,13 +19,12 @@ import com.twugteam.admin.core.presentation.util.DeviceConfiguration
 import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 import com.twugteam.admin.feature.chat.presentation.Res
 import com.twugteam.admin.feature.chat.presentation.empty_chat
-import com.twugteam.admin.feature.chat.presentation.no_messages
-import com.twugteam.admin.feature.chat.presentation.no_messages_subtitle
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun EmptyChatSection(
+fun EmptySection(
+    title: String,
+    description: String,
     modifier: Modifier = Modifier
 ) {
     val currentDeviceConfiguration = getCurrentDeviceConfiguration()
@@ -39,19 +38,19 @@ fun EmptyChatSection(
     ) {
         Image(
             painter = painterResource(Res.drawable.empty_chat),
-            contentDescription = stringResource(Res.string.no_messages),
+            contentDescription = title,
             modifier = Modifier.size(
-                if(currentDeviceConfiguration == DeviceConfiguration.MOBILE_LANDSCAPE) 125.dp else 200.dp
+                if (currentDeviceConfiguration == DeviceConfiguration.MOBILE_LANDSCAPE) 125.dp else 200.dp
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(Res.string.no_messages),
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.extended.textPrimary
         )
         Text(
-            text = stringResource(Res.string.no_messages_subtitle),
+            text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.extended.textSecondary
         )
@@ -60,10 +59,13 @@ fun EmptyChatSection(
 
 @Preview
 @Composable
-private fun EmptyChatSectionPreview() {
+private fun EmptySectionPreview() {
     ChirpTheme(
         isDarkTheme = true
     ) {
-        EmptyChatSection()
+        EmptySection(
+            title = "No Message",
+            description = "Be first to send a message"
+        )
     }
 }
