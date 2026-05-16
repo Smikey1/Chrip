@@ -1,27 +1,25 @@
 package com.twugteam.admin.chat.presentation.chat_detail.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
 import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.core.designsystem.components.chat.ChirpChatBubble
 import com.twugteam.admin.core.designsystem.components.chat.TrianglePosition
+import com.twugteam.admin.core.designsystem.components.dropdown.ChirpDropdownMenu
+import com.twugteam.admin.core.designsystem.components.dropdown.ChirpDropdownMenuItem
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.UiText
@@ -65,30 +63,19 @@ fun LocalUserMessage(
                     onMessageLongClick(message)
                 }
             )
-            DropdownMenu(
-                expanded = message.isMenuOpen,
-                onDismissRequest = onDismissMessageMenu,
-                containerColor = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.extended.surfaceOutline
+
+            ChirpDropdownMenu(
+                isDropdownMenuOpen = message.isMenuOpen,
+                onDismissClick = onDismissMessageMenu,
+                items = listOf(
+                    ChirpDropdownMenuItem(
+                        title = stringResource(Res.string.delete_for_everyone),
+                        icon = Icons.Default.Delete,
+                        contentColor = MaterialTheme.colorScheme.extended.destructiveHover,
+                        onClick = onDeleteClick
+                    )
                 )
-            ) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(Res.string.delete_for_everyone),
-                            color = MaterialTheme.colorScheme.extended.destructiveHover,
-                            fontWeight = FontWeight.Medium
-                        )
-                    },
-                    onClick = {
-                        onDismissMessageMenu()
-                        onDeleteClick()
-                    }
-                )
-            }
+            )
         }
         if (message.deliveryStatus == ChatMessageDeliveryStatus.FAILED) {
             IconButton(
