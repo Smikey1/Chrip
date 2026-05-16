@@ -1,5 +1,6 @@
 package com.twugteam.admin.chat.presentation.di
 
+import com.twugteam.admin.chat.presentation.chat_detail.ChatDetailViewModel
 import com.twugteam.admin.chat.presentation.chat_list.ChatListViewModel
 import com.twugteam.admin.chat.presentation.chat_list_detail.ChatListDetailViewModel
 import com.twugteam.admin.chat.presentation.create_chat.CreateChatViewModel
@@ -10,4 +11,5 @@ val chatPresentationModule = module {
     viewModelOf(::ChatListDetailViewModel)
     viewModelOf(::CreateChatViewModel)
     viewModelOf(::ChatListViewModel)
+    viewModelOf(::ChatDetailViewModel)
 }

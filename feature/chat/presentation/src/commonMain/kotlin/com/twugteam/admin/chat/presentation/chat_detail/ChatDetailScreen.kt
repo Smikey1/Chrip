@@ -1,0 +1,244 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
+package com.twugteam.admin.chat.presentation.chat_detail
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
+import com.twugteam.admin.chat.presentation.chat_detail.component.ChatDetailHeader
+import com.twugteam.admin.chat.presentation.chat_detail.component.InputMessageBox
+import com.twugteam.admin.chat.presentation.chat_detail.component.MessageList
+import com.twugteam.admin.chat.presentation.components.ChatHeader
+import com.twugteam.admin.chat.presentation.model.MessageUi
+import com.twugteam.admin.core.designsystem.components.avatar.ChatParticipantUi
+import com.twugteam.admin.core.designsystem.theme.ChirpTheme
+import com.twugteam.admin.core.designsystem.theme.extended
+import com.twugteam.admin.core.presentation.util.UiText
+import com.twugteam.admin.core.presentation.util.clearFocusOnTapOutside
+import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun ChatDetailScreenRoot(
+    chatId: String?,
+    isDetailScreenPresent: Boolean,
+    onBack: () -> Unit,
+    viewModel: ChatDetailViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(chatId){
+        viewModel.onAction(ChatDetailAction.OnSelectChat(chatId))
+    }
+
+    BackHandler(
+        enabled = !isDetailScreenPresent
+    ) {
+        viewModel.onAction(ChatDetailAction.OnSelectChat(null))
+        onBack()
+    }
+
+    ChatDetailScreenRootScreen(
+        isDetailScreenPresent = isDetailScreenPresent,
+        state = state,
+        onAction = viewModel::onAction,
+    )
+}
+
+@Composable
+private fun ChatDetailScreenRootScreen(
+    state: ChatDetailState,
+    onAction: (ChatDetailAction) -> Unit,
+    isDetailScreenPresent: Boolean
+) {
+    val currentDeviceConfiguration = getCurrentDeviceConfiguration()
+    val messageListState = rememberLazyListState()
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentWindowInsets = WindowInsets.safeDrawing,
+        containerColor = if (!currentDeviceConfiguration.isWideScreen) {
+            MaterialTheme.colorScheme.surface
+        } else MaterialTheme.colorScheme.extended.surfaceLower
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .clearFocusOnTapOutside()
+                .padding(innerPadding)
+                .then(
+                    if (currentDeviceConfiguration.isWideScreen) {
+                        Modifier.padding(horizontal = 8.dp)
+                    } else Modifier
+                )
+        ) {
+            Column(
+                modifier = Modifier,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DynamicRoundedCornerColumn(
+                    isCornerRounded = currentDeviceConfiguration.isWideScreen,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    ChatHeader {
+                        ChatDetailHeader(
+                            chatUi = state.chatUi,
+                            isDetailScreenPresent = isDetailScreenPresent,
+                            isChatOptionMenuOpen = state.isChatOptionMenuOpen,
+                            modifier = Modifier.fillMaxWidth(),
+                            onChatOptionClick = {
+                                onAction(ChatDetailAction.OnChatOptionsClick)
+                            },
+                            onDismissChatOption = {
+                                onAction(ChatDetailAction.OnDismissChatOptions)
+                            },
+                            onBackClick = {
+                                onAction(ChatDetailAction.OnBackClick)
+                            },
+                            onLeaveChatClick = {
+                                onAction(ChatDetailAction.OnLeaveChatClick)
+                            },
+                            onManageClick = {
+                                onAction(ChatDetailAction.OnChatMembersClick)
+                            }
+                        )
+                    }
+                    MessageList(
+                        messages = state.messages,
+                        listState = messageListState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        onDeleteMessageClick = {
+                            onAction(ChatDetailAction.OnDeleteMessageClick(it))
+                        },
+                        onMessageRetryClick = {
+                            onAction(ChatDetailAction.OnRetryClick(it))
+                        },
+                        onDismissMessageMenu = {
+                            onAction(ChatDetailAction.OnDismissMessageMenu)
+                        },
+                        onMessageLongClick = {
+                            onAction(ChatDetailAction.OnMessageLongClick(it))
+                        }
+                    )
+                    AnimatedVisibility(
+                        visible = !currentDeviceConfiguration.isWideScreen && state.chatUi != null
+                    ) {
+                        InputMessageBox(
+                            messageTextFieldState = state.messageTextFieldState,
+                            connectionState = state.networkConnectionState,
+                            isTextInputFieldEnable = state.canSendMessage,
+                            modifier = Modifier.fillMaxWidth(),
+                            onSendClick = {
+                                onAction(ChatDetailAction.OnSendMessageClick)
+                            }
+                        )
+                    }
+                }
+                if (currentDeviceConfiguration.isWideScreen) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AnimatedVisibility(
+                        visible = currentDeviceConfiguration.isWideScreen && state.chatUi != null
+                    ) {
+                        InputMessageBox(
+                            messageTextFieldState = state.messageTextFieldState,
+                            connectionState = state.networkConnectionState,
+                            isTextInputFieldEnable = state.canSendMessage,
+                            modifier = Modifier.fillMaxWidth(),
+                            onSendClick = {
+                                onAction(ChatDetailAction.OnSendMessageClick)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DynamicRoundedCornerColumn(
+    isCornerRounded: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .shadow(
+                elevation = if (isCornerRounded) 4.dp else 0.dp,
+                shape = if (isCornerRounded) RoundedCornerShape(16.dp) else RectangleShape,
+            )
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = if (isCornerRounded) RoundedCornerShape(16.dp) else RectangleShape,
+            )
+    ) {
+        content()
+    }
+}
+
+@Preview
+@Composable
+private fun ChatDetailScreenRootScreenPreview() {
+    ChirpTheme(
+        isDarkTheme = true
+    ) {
+        ChatDetailScreenRootScreen(
+            state = ChatDetailState(
+                messages = (1..20).map {
+                    if (it % 2 == 0) {
+                        MessageUi.LocalUserMessage(
+                            id = "121",
+                            content = "Hey",
+                            isMenuOpen = false,
+                            formattedSentTime = UiText.DynamicString("now"),
+                            deliveryStatus = ChatMessageDeliveryStatus.FAILED
+                        )
+                    } else {
+                        MessageUi.OtherUserMessage(
+                            id = "121",
+                            content = "Hey",
+                            formattedSentTime = UiText.DynamicString("now"),
+                            sender = ChatParticipantUi(
+                                userId = "343",
+                                username = "Kiran"
+                            )
+                        )
+                    }
+                }
+            ),
+            onAction = {},
+            isDetailScreenPresent = true
+        )
+    }
+}

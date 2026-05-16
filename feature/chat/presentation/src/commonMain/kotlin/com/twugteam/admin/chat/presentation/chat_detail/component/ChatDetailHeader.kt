@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -43,7 +44,7 @@ import com.twugteam.admin.core.designsystem.Res as DesignSystemRes
 
 @Composable
 fun ChatDetailHeader(
-    chatUi: ChatUi,
+    chatUi: ChatUi?,
     isDetailScreenPresent: Boolean,
     isChatOptionMenuOpen: Boolean,
     onChatOptionClick: () -> Unit,
@@ -72,14 +73,18 @@ fun ChatDetailHeader(
                 )
             }
         }
-        ChatItemHeaderRow(
-            chat = chatUi,
-            modifier = Modifier
-                .weight(1f)
-                .clickable {
-                    onManageClick()
-                }
-        )
+        if (chatUi != null){
+            ChatItemHeaderRow(
+                chat = chatUi,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        onManageClick()
+                    }
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
 
         Box {
             ChripIconButton(
