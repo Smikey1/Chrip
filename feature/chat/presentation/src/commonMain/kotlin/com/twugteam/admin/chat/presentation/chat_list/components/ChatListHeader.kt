@@ -1,4 +1,4 @@
-package com.twugteam.admin.chat.presentation.chat_list
+package com.twugteam.admin.chat.presentation.chat_list.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
