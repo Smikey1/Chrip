@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ChatDao {
     @Upsert
-    suspend fun upsertChat(chatEntity: ChatEntity): ChatDao
+    suspend fun upsertChat(chatEntity: ChatEntity)
 
     @Upsert
-    suspend fun upsertChats(chatEntities: List<ChatEntity>): ChatDao
+    suspend fun upsertChats(chatEntities: List<ChatEntity>)
 
     @Query("delete from chatentity where chatId = :chatId")
     suspend fun deleteChatById(chatId: String)
@@ -39,9 +39,11 @@ interface ChatDao {
     fun getTotalChatCount(): Flow<Int>
 
     @Query("select * from chatentity order by lastActivityAt desc")
+    @Transaction
     fun getChatsWithParticipants(): Flow<List<ChatWithParticipant>>
 
     @Query("select * from chatentity where chatId = :chatId")
+    @Transaction
     suspend fun getChatById(chatId: String): ChatWithParticipant?
 
     @Query(
@@ -53,9 +55,10 @@ interface ChatDao {
         order by cp.username
     """
     )
-    suspend fun getActiveParticipantByChatId(chatId: String): Flow<List<ChatParticipantEntity>>
+    fun getActiveParticipantByChatId(chatId: String): Flow<List<ChatParticipantEntity>>
 
     @Query("select * from chatentity where chatId = :chatId")
+    @Transaction
     fun getChatInfoById(chatId: String): Flow<ChatInfoEntity>?
 
     @Transaction
