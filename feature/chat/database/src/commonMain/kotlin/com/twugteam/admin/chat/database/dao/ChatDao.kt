@@ -11,7 +11,6 @@ import com.twugteam.admin.chat.database.entities.ChatParticipantCrossRef
 import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
 import com.twugteam.admin.chat.database.entities.ChatWithParticipant
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.selects.select
 
 @Dao
 interface ChatDao {
@@ -40,18 +39,6 @@ interface ChatDao {
     @Query("select count(*) from chatentity")
     fun getTotalChatCount(): Flow<Int>
 
-    @Query(
-        """
-        select distinct c.* from chatentity c
-        join chatparticipantcrossref cpcr
-        on c.chatId = cpcr.chatId
-        where cpcr.isUserStillActiveToThisChat = true
-        order by c.lastActivityAt desc
-    """
-    )
-    @Transaction
-    fun getAllChatsWithActiveParticipants(): Flow<List<ChatWithParticipant>>
-
     @Query("select * from chatentity order by lastActivityAt desc")
     @Transaction
     fun getChatsWithParticipants(): Flow<List<ChatWithParticipant>>
@@ -73,12 +60,11 @@ interface ChatDao {
 
     @Query(
         """
-        select c.* from chatentity c
-        join chatparticipantcrossref cpcr
-        on c.chatId = cpcr.chatId
-        where c.chatId = :chatId and cpcr.isUserStillActiveToThisChat = true
-    """)
-        @Transaction
+        select * from chatentity
+        where chatId = :chatId
+    """
+    )
+    @Transaction
     fun getChatInfoById(chatId: String): Flow<ChatInfoEntity?>
 
     @Transaction

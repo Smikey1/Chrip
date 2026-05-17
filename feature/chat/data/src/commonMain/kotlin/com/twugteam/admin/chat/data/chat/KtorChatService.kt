@@ -5,10 +5,13 @@ import com.twugteam.admin.chat.data.dto.request.CreateChatRequest
 import com.twugteam.admin.chat.data.mappers.toDomain
 import com.twugteam.admin.chat.domain.chat.ChatService
 import com.twugteam.admin.chat.domain.models.Chat
+import com.twugteam.admin.core.data.networking.delete
 import com.twugteam.admin.core.data.networking.get
 import com.twugteam.admin.core.data.networking.post
 import com.twugteam.admin.core.domain.utils.DataError
+import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
+import com.twugteam.admin.core.domain.utils.asEmptyDataResult
 import com.twugteam.admin.core.domain.utils.map
 import io.ktor.client.HttpClient
 
@@ -47,5 +50,11 @@ class KtorChatService(
         ).map {
             it.toDomain()
         }
+    }
+
+    override suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote> {
+        return httpClient.delete<Unit>(
+            route = "$CHAT_ENDPOINT/$chatId/leave",
+        ).asEmptyDataResult()
     }
 }

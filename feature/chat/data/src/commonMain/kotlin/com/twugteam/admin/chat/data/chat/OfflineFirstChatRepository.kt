@@ -5,6 +5,8 @@ import com.twugteam.admin.chat.data.mappers.toEntities
 import com.twugteam.admin.chat.data.mappers.toEntity
 import com.twugteam.admin.chat.data.mappers.toView
 import com.twugteam.admin.chat.database.ChirpChatDatabase
+import com.twugteam.admin.chat.database.entities.ChatInfoEntity
+import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
 import com.twugteam.admin.chat.database.entities.ChatWithParticipant
 import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.domain.chat.ChatService
@@ -14,30 +16,52 @@ import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.asEmptyDataResult
-import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.supervisorScope
 
 class OfflineFirstChatRepository(
     private val chatService: ChatService,
     private val db: ChirpChatDatabase
 ) : ChatRepository {
     override fun getChats(): Flow<List<Chat>> {
-        return db.chatDao.getAllChatsWithActiveParticipants().map { chatWithParticipants ->
-            chatWithParticipants.map { chatWithParticipant ->
-                chatWithParticipant.toDomain()
+        return db.chatDao.getChatsWithParticipants()
+            .map { allChatWithParticipants ->
+                supervisorScope {
+                    allChatWithParticipants.map { chatWithParticipant ->
+                        async {
+                            ChatWithParticipant(
+                                chat = chatWithParticipant.chat,
+                                participants = chatWithParticipant
+                                    .participants.onlyActive(chatWithParticipant.chat.chatId),
+                                lastMessageView = chatWithParticipant.lastMessageView
+                            )
+                        }
+                    }
+                        .awaitAll()
+                        .map { it.toDomain() }
+                }
             }
-        }
     }
 
     override fun getChatInfoById(chatId: String): Flow<ChatInfo> {
         return db.chatDao.getChatInfoById(chatId)
             .filterNotNull()
             .map { chatInfoEntity ->
-            chatInfoEntity.toDomain()
-        }
+                ChatInfoEntity(
+                    chat = chatInfoEntity.chat,
+                    participants = chatInfoEntity.participants.onlyActive(chatInfoEntity.chat.chatId),
+                    messageWithSenders = chatInfoEntity.messageWithSenders
+                )
+            }
+            .map { chatInfoEntity ->
+                chatInfoEntity.toDomain()
+            }
     }
 
     override suspend fun fetchChatById(chatId: String): EmptyResult<DataError.Remote> {
@@ -74,7 +98,7 @@ class OfflineFirstChatRepository(
             }
     }
 
-    override suspend fun createChat(otherUserIds: List<String>): Result<Chat,DataError.Remote> {
+    override suspend fun createChat(otherUserIds: List<String>): Result<Chat, DataError.Remote> {
         return chatService
             .createChat(otherUserIds)
             .onSuccess { chat ->
@@ -87,4 +111,21 @@ class OfflineFirstChatRepository(
             }
     }
 
+    override suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote> {
+        return chatService
+            .leaveChat(chatId)
+            .onSuccess {
+                db.chatDao.deleteChatById(chatId)
+            }
+    }
+
+    private suspend fun List<ChatParticipantEntity>.onlyActive(chatId: String): List<ChatParticipantEntity> {
+        val activeParticipantIds = db
+            .chatDao.getActiveParticipantByChatId(chatId)
+            .first()
+            .map { it.userId }
+
+        return this.filter { it.userId in activeParticipantIds }
+
+    }
 }

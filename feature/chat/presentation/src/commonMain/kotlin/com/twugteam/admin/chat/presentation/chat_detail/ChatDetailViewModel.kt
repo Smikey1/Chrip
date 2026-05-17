@@ -2,12 +2,15 @@
 
 package com.twugteam.admin.chat.presentation.chat_detail
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.presentation.mappers.toUi
 import com.twugteam.admin.core.domain.auth.SessionStorage
+import com.twugteam.admin.core.domain.utils.onFailure
+import com.twugteam.admin.core.domain.utils.onSuccess
+import com.twugteam.admin.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +27,8 @@ import kotlinx.coroutines.launch
 class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
     private val sessionStorage: SessionStorage,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private var hasLoadedInitialData = false
-
 
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -74,7 +75,34 @@ class ChatDetailViewModel(
     fun onAction(action: ChatDetailAction) {
         when (action) {
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
-            else -> Unit
+            ChatDetailAction.OnLeaveChatClick -> onLeaveChatClick()
+            ChatDetailAction.OnBackClick -> TODO()
+            ChatDetailAction.OnChatMembersClick -> TODO()
+            ChatDetailAction.OnChatMenuClick -> TODO()
+            ChatDetailAction.OnChatOptionsClick -> onChatOptionClick()
+            is ChatDetailAction.OnDeleteMessageClick -> TODO()
+            ChatDetailAction.OnDismissChatOptions -> onDismissChatOptionClick()
+            ChatDetailAction.OnDismissMessageMenu -> TODO()
+            is ChatDetailAction.OnMessageLongClick -> TODO()
+            is ChatDetailAction.OnRetryClick -> TODO()
+            ChatDetailAction.OnScrollToTop -> TODO()
+            ChatDetailAction.OnSendMessageClick -> TODO()
+        }
+    }
+
+    private fun onChatOptionClick() {
+        _state.update {
+            it.copy(
+                isChatOptionMenuOpen = true
+            )
+        }
+    }
+
+    private fun onDismissChatOptionClick() {
+        _state.update {
+            it.copy(
+                isChatOptionMenuOpen = false
+            )
         }
     }
 
@@ -87,4 +115,30 @@ class ChatDetailViewModel(
         }
     }
 
+    private fun onLeaveChatClick() {
+        val currentlySelectedChatId = _chatId.value ?: return
+        _state.update {
+            it.copy(
+                isChatOptionMenuOpen = false
+            )
+        }
+        viewModelScope.launch {
+            chatRepository
+                .leaveChat(currentlySelectedChatId)
+                .onSuccess {
+                    _state.value.messageTextFieldState.clearText()
+                    _chatId.update { null }
+                    _state.update {
+                        it.copy(
+                            chatUi = null,
+                            messages = emptyList(),
+                            bannerState = BannerState()
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    ChatDetailEvent.OnError(error.toUiText())
+                }
+        }
+    }
 }
