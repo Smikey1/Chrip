@@ -26,7 +26,7 @@ fun createNoSpacingPaneScaffoldDirective(): PaneScaffoldDirective {
     val maxVerticalPartitions: Int
 
     // TableTop is folding device form vertically
-    if(currentWindowAdaptiveInfo.windowPosture.isTabletop) {
+    if (currentWindowAdaptiveInfo.windowPosture.isTabletop) {
         maxVerticalPartitions = 2
         verticalPartitionSpacerSize = 24.dp
     } else {
@@ -34,12 +34,12 @@ fun createNoSpacingPaneScaffoldDirective(): PaneScaffoldDirective {
         verticalPartitionSpacerSize = 0.dp
     }
     return PaneScaffoldDirective(
-        maxHorizontalPartitions = maxVerticalPartitions,
+        maxHorizontalPartitions = maxHorizontalPartitions,
         // there should not be any extra spacing for horizontal partition between
         // Chat List and Chat Detail Screen
         horizontalPartitionSpacerSize = 0.dp,
         maxVerticalPartitions = maxVerticalPartitions,
-        verticalPartitionSpacerSize  = verticalPartitionSpacerSize,
+        verticalPartitionSpacerSize = verticalPartitionSpacerSize,
         defaultPanePreferredWidth = 360.dp,
         excludedBounds = emptyList()
 
