@@ -1,4 +1,4 @@
-@file:OptIn(FlowPreview::class)
+@file:OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 
 package com.twugteam.admin.chat.presentation.manage_chat
 
@@ -18,11 +18,15 @@ import com.twugteam.admin.core.presentation.util.UiText
 import com.twugteam.admin.core.presentation.util.toUiText
 import com.twugteam.admin.feature.chat.presentation.Res
 import com.twugteam.admin.feature.chat.presentation.error_participant_not_found
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -39,9 +43,11 @@ class ManageChatViewModel(
 
     var hasLoadedInitialData: Boolean = false
 
-    private val eventChannel = Channel<ManageChatEvent>()
+    private val _chatId = MutableStateFlow<String?>(null)
 
+    private val eventChannel = Channel<ManageChatEvent>()
     val events = eventChannel.receiveAsFlow()
+
     private val _state = MutableStateFlow(CreateOrManageChatState())
 
     private val searchFlow = snapshotFlow { _state.value.searchQueryTextState.text.toString() }
@@ -50,8 +56,17 @@ class ManageChatViewModel(
             performSearch(search)
         }
 
-    val state = _state
-        .onStart {
+    val state = _chatId
+        .flatMapLatest { chatId ->
+            if (chatId != null) {
+                chatRepository.getActiveParticipantByChatId(chatId)
+            } else emptyFlow()
+        }
+        .combine(_state) { participant, currentState ->
+            currentState.copy(
+                existingChatParticipants = participant.map { it.toUi() }
+            )
+        }.onStart {
             if (!hasLoadedInitialData) {
                 searchFlow.launchIn(viewModelScope)
                 hasLoadedInitialData = true
@@ -65,51 +80,62 @@ class ManageChatViewModel(
 
     fun onAction(action: CreateOrManageChatAction) {
         when (action) {
-            CreateOrManageChatAction.OnAddParticipantClick -> addParticipant()
-            CreateOrManageChatAction.OnCreateOrManageChatClick -> manageChat()
-            CreateOrManageChatAction.OnDismissDialog -> {}
+            CreateOrManageChatAction.OnAddParticipantClick -> addParticipantToExistingList()
+            CreateOrManageChatAction.OnCreateOrManageChatClick -> addParticipantToChat()
+            is CreateOrManageChatAction.ManageChatParticipants.OnSelectChat -> {
+                _chatId.update { action.chatId }
+            }
+
+            else -> Unit
         }
     }
 
-    private fun addParticipant() {
-        state.value.currentSearchResult?.let { chatParticipant ->
-            val isAlreadyPartOfChat = state.value.selectedChatParticipants.any {
-                it.userId == chatParticipant.userId
+    private fun addParticipantToExistingList() {
+        state.value.currentSearchResult?.let { participantFromSearch ->
+            val isAlreadySelected = state.value.selectedChatParticipants.any {
+                it.userId == participantFromSearch.userId
             }
-            if (!isAlreadyPartOfChat) {
-                _state.update {
-                    it.copy(
-                        selectedChatParticipants = it.selectedChatParticipants.plus(chatParticipant),
-                        canAddParticipant = false,
-                        currentSearchResult = null
-                    )
-                }
-                _state.value.searchQueryTextState.clearText()
+            val isAlreadyPartOfChat = state.value.existingChatParticipants.any {
+                it.userId == participantFromSearch.userId
+            }
+
+            val updatedParticipants = if (isAlreadyPartOfChat || isAlreadySelected) {
+                state.value.selectedChatParticipants
+            } else state.value.selectedChatParticipants + participantFromSearch
+
+            _state.value.searchQueryTextState.clearText()
+            _state.update {
+                it.copy(
+                    selectedChatParticipants = updatedParticipants,
+                    canAddParticipant = false,
+                    currentSearchResult = null
+                )
             }
         }
     }
 
-    private fun manageChat() {
-        val userIds = state.value.selectedChatParticipants.map {
-            it.userId
-        }
-        if (userIds.isEmpty()) {
+    private fun addParticipantToChat() {
+        if (state.value.selectedChatParticipants.isEmpty()) {
             return
         }
+        val chatId = _chatId.value ?: return
+
+        val selectedParticipants = state.value.selectedChatParticipants
+        val selectedUserIds = selectedParticipants.map { it.userId }
 
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isCreatingChat = true,
+                    isSubmitting = true,
                     canAddParticipant = false
                 )
             }
             chatRepository
-                .createChat(userIds)
-                .onSuccess { chat ->
+                .addParticipantsToChat(chatId, selectedUserIds)
+                .onSuccess {
                     _state.update {
                         it.copy(
-                            isCreatingChat = false
+                            isSubmitting = false
                         )
                     }
                     eventChannel.send(ManageChatEvent.OnMemberAdded)
@@ -117,8 +143,8 @@ class ManageChatViewModel(
                 .onFailure { error ->
                     _state.update {
                         it.copy(
-                            isCreatingChat = false,
-                            createChatError = error.toUiText(),
+                            isSubmitting = false,
+                            submitError = error.toUiText(),
                             canAddParticipant = it.currentSearchResult != null && !it.isSearching
                         )
                     }

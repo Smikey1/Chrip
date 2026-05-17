@@ -12,6 +12,7 @@ import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.domain.chat.ChatService
 import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.domain.models.ChatInfo
+import com.twugteam.admin.chat.domain.models.ChatParticipant
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
@@ -61,6 +62,15 @@ class OfflineFirstChatRepository(
             }
             .map { chatInfoEntity ->
                 chatInfoEntity.toDomain()
+            }
+    }
+
+    override fun getActiveParticipantByChatId(chatId: String): Flow<List<ChatParticipant>> {
+        return db.chatDao.getActiveParticipantByChatId(chatId)
+            .map { chatParticipantEntities ->
+                chatParticipantEntities.map {
+                    it.toDomain()
+                }
             }
     }
 
@@ -127,5 +137,21 @@ class OfflineFirstChatRepository(
 
         return this.filter { it.userId in activeParticipantIds }
 
+    }
+
+    override suspend fun addParticipantsToChat(
+        chatId: String,
+        otherUserIds: List<String>
+    ): Result<Chat, DataError.Remote> {
+        return chatService
+            .addParticipantsToChat(chatId,otherUserIds)
+            .onSuccess {chat ->
+                db.chatDao.upsertChatWithParticipantAndCrossRefs(
+                    chatEntity = chat.toEntity(),
+                    participants = chat.participants.toEntities(),
+                    chatParticipantDao = db.chatParticipantDao,
+                    crossRefDao = db.chatParticipantCrossRefDao
+                )
+            }
     }
 }

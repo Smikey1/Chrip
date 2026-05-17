@@ -135,6 +135,7 @@ fun ChatListDetailAdaptiveScreen(
         visible = state.dialogState is DialogState.ManageChat
     ) {
         ManageChatScreenRoot(
+            chatId = state.selectedChatId,
             onMemberAdded = {
                 viewModel.onAction(ChatListDetailAction.OnDismissClick)
             },

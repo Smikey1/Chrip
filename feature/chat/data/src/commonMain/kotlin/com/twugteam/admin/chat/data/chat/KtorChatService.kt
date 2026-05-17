@@ -1,6 +1,7 @@
 package com.twugteam.admin.chat.data.chat
 
 import com.twugteam.admin.chat.data.dto.ChatDto
+import com.twugteam.admin.chat.data.dto.request.AddParticipantToChatRequest
 import com.twugteam.admin.chat.data.dto.request.CreateChatRequest
 import com.twugteam.admin.chat.data.mappers.toDomain
 import com.twugteam.admin.chat.domain.chat.ChatService
@@ -56,5 +57,19 @@ class KtorChatService(
         return httpClient.delete<Unit>(
             route = "$CHAT_ENDPOINT/$chatId/leave",
         ).asEmptyDataResult()
+    }
+
+    override suspend fun addParticipantsToChat(
+        chatId: String,
+        otherUserIds: List<String>
+    ): Result<Chat, DataError.Remote> {
+        return httpClient.post<AddParticipantToChatRequest, ChatDto>(
+            route = "$CHAT_ENDPOINT/$chatId/add",
+            body = AddParticipantToChatRequest(
+                userIds = otherUserIds
+            )
+        ).map {
+            it.toDomain()
+        }
     }
 }

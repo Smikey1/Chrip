@@ -1,6 +1,7 @@
 package com.twugteam.admin.chat.presentation.manage_chat
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,11 +20,16 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ManageChatScreenRoot(
+    chatId: String?,
     onDismiss: () -> Unit,
     onMemberAdded: () -> Unit,
     viewModel: ManageChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(chatId){
+        viewModel.onAction(CreateOrManageChatAction.ManageChatParticipants.OnSelectChat(chatId))
+    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {

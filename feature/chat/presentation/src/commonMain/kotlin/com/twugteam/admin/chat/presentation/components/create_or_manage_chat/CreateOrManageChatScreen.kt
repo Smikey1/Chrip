@@ -94,12 +94,12 @@ fun CreateOrManageChatScreen(
         ChirpHorizontalDivider()
         ManageChatButtonSection(
             modifier = Modifier.fillMaxWidth(),
-            error = state.createChatError?.asString(),
+            error = state.submitError?.asString(),
             primaryButton = {
                 ChirpButton(
                     text = primaryButtonText,
                     enabled = state.selectedChatParticipants.isNotEmpty(),
-                    isLoading = state.isCreatingChat,
+                    isLoading = state.isSubmitting,
                     onClick = {
                         onAction(CreateOrManageChatAction.OnCreateOrManageChatClick)
                     }
