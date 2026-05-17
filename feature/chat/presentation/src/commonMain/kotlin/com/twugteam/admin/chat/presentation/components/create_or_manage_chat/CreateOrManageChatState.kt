@@ -1,11 +1,12 @@
-package com.twugteam.admin.chat.presentation.create_chat
+package com.twugteam.admin.chat.presentation.components.create_or_manage_chat
 
 import androidx.compose.foundation.text.input.TextFieldState
 import com.twugteam.admin.core.designsystem.components.avatar.ChatParticipantUi
 import com.twugteam.admin.core.presentation.util.UiText
 
-data class CreateChatState(
+data class CreateOrManageChatState(
     val searchQueryTextState: TextFieldState = TextFieldState(),
+    val existingChatParticipants: List<ChatParticipantUi> = emptyList(),
     val selectedChatParticipants: List<ChatParticipantUi> = emptyList(),
     val isSearching: Boolean = false,
     val isCreatingChat: Boolean = false,

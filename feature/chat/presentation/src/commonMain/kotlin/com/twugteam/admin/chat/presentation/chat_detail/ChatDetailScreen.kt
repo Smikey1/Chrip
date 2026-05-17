@@ -59,6 +59,7 @@ fun ChatDetailScreenRoot(
     chatId: String?,
     isDetailScreenPresent: Boolean,
     onBack: () -> Unit,
+    onChatMemberClick: () -> Unit,
     viewModel: ChatDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -86,7 +87,14 @@ fun ChatDetailScreenRoot(
     ChatDetailScreenRootScreen(
         isDetailScreenPresent = isDetailScreenPresent,
         state = state,
-        onAction = viewModel::onAction,
+        onAction = { action ->
+            when (action) {
+                is ChatDetailAction.OnBackClick -> onBack()
+                is ChatDetailAction.OnChatMembersClick -> onChatMemberClick()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        },
         snackbarHostState = snackbarState
     )
 }

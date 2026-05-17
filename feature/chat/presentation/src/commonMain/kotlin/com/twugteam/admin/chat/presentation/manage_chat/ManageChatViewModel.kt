@@ -1,6 +1,6 @@
 @file:OptIn(FlowPreview::class)
 
-package com.twugteam.admin.chat.presentation.create_chat
+package com.twugteam.admin.chat.presentation.manage_chat
 
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
@@ -32,14 +32,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class CreateChatViewModel(
+class ManageChatViewModel(
     private val chatParticipantService: ChatParticipantService,
     private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     var hasLoadedInitialData: Boolean = false
 
-    private val eventChannel = Channel<CreateChatEvent>()
+    private val eventChannel = Channel<ManageChatEvent>()
 
     val events = eventChannel.receiveAsFlow()
     private val _state = MutableStateFlow(CreateOrManageChatState())
@@ -66,8 +66,8 @@ class CreateChatViewModel(
     fun onAction(action: CreateOrManageChatAction) {
         when (action) {
             CreateOrManageChatAction.OnAddParticipantClick -> addParticipant()
-            CreateOrManageChatAction.OnCreateOrManageChatClick -> createChat()
-            else -> Unit
+            CreateOrManageChatAction.OnCreateOrManageChatClick -> manageChat()
+            CreateOrManageChatAction.OnDismissDialog -> {}
         }
     }
 
@@ -89,7 +89,7 @@ class CreateChatViewModel(
         }
     }
 
-    private fun createChat() {
+    private fun manageChat() {
         val userIds = state.value.selectedChatParticipants.map {
             it.userId
         }
@@ -112,7 +112,7 @@ class CreateChatViewModel(
                             isCreatingChat = false
                         )
                     }
-                    eventChannel.send(CreateChatEvent.OnChatCreated(chat))
+                    eventChannel.send(ManageChatEvent.OnMemberAdded)
                 }
                 .onFailure { error ->
                     _state.update {

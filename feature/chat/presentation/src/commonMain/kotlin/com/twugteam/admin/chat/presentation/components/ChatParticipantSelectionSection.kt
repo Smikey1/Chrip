@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.twugteam.admin.core.designsystem.components.avatar.ChatParticipantUi
 import com.twugteam.admin.core.designsystem.components.avatar.ChripAvatarPhoto
+import com.twugteam.admin.core.designsystem.components.divider.ChirpHorizontalDivider
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.designsystem.theme.titleXSmall
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
@@ -27,6 +28,7 @@ import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 
 @Composable
 fun ColumnScope.ChatParticipantSelectionSection(
+    existingParticipants: List<ChatParticipantUi>,
     selectedParticipants: List<ChatParticipantUi>,
     modifier: Modifier = Modifier,
     searchResult: ChatParticipantUi? = null
@@ -51,6 +53,20 @@ fun ColumnScope.ChatParticipantSelectionSection(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
+            items(
+                items = existingParticipants,
+                key = { "existing_${it.userId}" }
+            ) { existingChatParticipant ->
+                ChatParticipantListItem(
+                    participant = existingChatParticipant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            if (existingParticipants.isNotEmpty()) {
+                item {
+                    ChirpHorizontalDivider()
+                }
+            }
             searchResult?.let {
                 item {
                     ChatParticipantListItem(

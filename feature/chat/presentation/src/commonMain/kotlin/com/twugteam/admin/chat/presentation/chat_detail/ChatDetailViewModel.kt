@@ -76,17 +76,10 @@ class ChatDetailViewModel(
         when (action) {
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnLeaveChatClick -> onLeaveChatClick()
-            ChatDetailAction.OnBackClick -> TODO()
-            ChatDetailAction.OnChatMembersClick -> TODO()
-            ChatDetailAction.OnChatMenuClick -> TODO()
+            ChatDetailAction.OnChatMembersClick -> onDismissChatOptionClick()
             ChatDetailAction.OnChatOptionsClick -> onChatOptionClick()
-            is ChatDetailAction.OnDeleteMessageClick -> TODO()
             ChatDetailAction.OnDismissChatOptions -> onDismissChatOptionClick()
-            ChatDetailAction.OnDismissMessageMenu -> TODO()
-            is ChatDetailAction.OnMessageLongClick -> TODO()
-            is ChatDetailAction.OnRetryClick -> TODO()
-            ChatDetailAction.OnScrollToTop -> TODO()
-            ChatDetailAction.OnSendMessageClick -> TODO()
+            else -> Unit
         }
     }
 
