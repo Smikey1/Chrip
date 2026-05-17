@@ -3,8 +3,10 @@ package com.twugteam.admin.chat.data.di
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.twugteam.admin.chat.data.chat.KtorChatParticipantService
 import com.twugteam.admin.chat.data.chat.KtorChatService
+import com.twugteam.admin.chat.data.chat.OfflineFirstChatRepository
 import com.twugteam.admin.chat.database.DatabaseFactory
 import com.twugteam.admin.chat.domain.chat.ChatParticipantService
+import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.domain.chat.ChatService
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -24,5 +26,7 @@ val chatDataModule = module {
             .setDriver(BundledSQLiteDriver())
             .build()
     }
+
+    singleOf(::OfflineFirstChatRepository) bind ChatRepository::class
 
 }
