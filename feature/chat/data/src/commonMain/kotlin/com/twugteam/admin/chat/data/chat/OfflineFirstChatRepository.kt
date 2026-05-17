@@ -14,6 +14,7 @@ import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.asEmptyDataResult
+import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -70,6 +71,19 @@ class OfflineFirstChatRepository(
                     messageDao = db.chatMessageDao
                 )
 
+            }
+    }
+
+    override suspend fun createChat(otherUserIds: List<String>): Result<Chat,DataError.Remote> {
+        return chatService
+            .createChat(otherUserIds)
+            .onSuccess { chat ->
+                db.chatDao.upsertChatWithParticipantAndCrossRefs(
+                    chatEntity = chat.toEntity(),
+                    participants = chat.participants.toEntities(),
+                    crossRefDao = db.chatParticipantCrossRefDao,
+                    chatParticipantDao = db.chatParticipantDao
+                )
             }
     }
 

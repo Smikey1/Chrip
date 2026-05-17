@@ -7,7 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.chat.domain.chat.ChatParticipantService
-import com.twugteam.admin.chat.domain.chat.ChatService
+import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.presentation.mappers.toUi
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.onFailure
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -31,7 +32,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class CreateChatViewModel(
     private val chatParticipantService: ChatParticipantService,
-    private val chatService: ChatService
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     var hasLoadedInitialData: Boolean = false
@@ -48,7 +49,7 @@ class CreateChatViewModel(
         }
 
     val state = _state
-        .onEach {
+        .onStart {
             if (!hasLoadedInitialData) {
                 searchFlow.launchIn(viewModelScope)
                 hasLoadedInitialData = true
@@ -73,7 +74,7 @@ class CreateChatViewModel(
             val isAlreadyPartOfChat = state.value.selectedChatParticipants.any {
                 it.userId == chatParticipant.userId
             }
-            if(!isAlreadyPartOfChat){
+            if (!isAlreadyPartOfChat) {
                 _state.update {
                     it.copy(
                         selectedChatParticipants = it.selectedChatParticipants.plus(chatParticipant),
@@ -90,7 +91,7 @@ class CreateChatViewModel(
         val userIds = state.value.selectedChatParticipants.map {
             it.userId
         }
-        if(userIds.isEmpty()){
+        if (userIds.isEmpty()) {
             return
         }
 
@@ -101,9 +102,9 @@ class CreateChatViewModel(
                     canAddParticipant = false
                 )
             }
-            chatService
+            chatRepository
                 .createChat(userIds)
-                .onSuccess {  chat ->
+                .onSuccess { chat ->
                     _state.update {
                         it.copy(
                             isCreatingChat = false
@@ -111,7 +112,7 @@ class CreateChatViewModel(
                     }
                     eventChannel.send(CreateChatEvent.ChatCreated(chat))
                 }
-                .onFailure {error ->
+                .onFailure { error ->
                     _state.update {
                         it.copy(
                             isCreatingChat = false,
