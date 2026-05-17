@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "78e3ec33ab25bbbfa9c50514fba9d875",
+    "identityHash": "b79db2edb32fec6fff40479dc44e2614",
     "entities": [
       {
         "tableName": "ChatEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatId` TEXT NOT NULL, `lastActivityAt` TEXT NOT NULL, PRIMARY KEY(`chatId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`chatId` TEXT NOT NULL, `lastActivityAt` INTEGER NOT NULL, PRIMARY KEY(`chatId`))",
         "fields": [
           {
             "fieldPath": "chatId",
@@ -17,7 +17,7 @@
           {
             "fieldPath": "lastActivityAt",
             "columnName": "lastActivityAt",
-            "affinity": "TEXT",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -228,7 +228,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '78e3ec33ab25bbbfa9c50514fba9d875')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b79db2edb32fec6fff40479dc44e2614')"
     ]
   }
 }

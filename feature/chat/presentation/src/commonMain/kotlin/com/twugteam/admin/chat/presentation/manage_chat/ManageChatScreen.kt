@@ -1,32 +1,39 @@
-package com.twugteam.admin.chat.presentation.create_chat
+package com.twugteam.admin.chat.presentation.manage_chat
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.presentation.components.create_or_manage_chat.CreateOrManageChatAction
 import com.twugteam.admin.chat.presentation.components.create_or_manage_chat.CreateOrManageChatScreen
 import com.twugteam.admin.chat.presentation.components.create_or_manage_chat.CreateOrManageChatState
+import com.twugteam.admin.core.designsystem.components.avatar.ChatParticipantUi
 import com.twugteam.admin.core.designsystem.components.dialogs.ChirpAdaptiveDialogSheetLayout
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.presentation.util.ObserveAsEvents
 import com.twugteam.admin.feature.chat.presentation.Res
-import com.twugteam.admin.feature.chat.presentation.create_chat
+import com.twugteam.admin.feature.chat.presentation.chat_members
+import com.twugteam.admin.feature.chat.presentation.save
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun CreateChatScreenRoot(
+fun ManageChatScreenRoot(
+    chatId: String?,
     onDismiss: () -> Unit,
-    onChatCreated: (Chat) -> Unit,
-    viewModel: CreateChatViewModel = koinViewModel()
+    onMemberAdded: () -> Unit,
+    viewModel: ManageChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(chatId){
+        viewModel.onAction(CreateOrManageChatAction.ManageChatParticipants.OnSelectChat(chatId))
+    }
+
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is CreateChatEvent.OnChatCreated -> onChatCreated(event.chat)
+            is ManageChatEvent.OnMemberAdded -> onMemberAdded()
         }
     }
 
@@ -34,8 +41,8 @@ fun CreateChatScreenRoot(
         onDismiss = onDismiss
     ) {
         CreateOrManageChatScreen(
-            headerText = stringResource(Res.string.create_chat),
-            primaryButtonText = stringResource(Res.string.create_chat),
+            headerText = stringResource(Res.string.chat_members),
+            primaryButtonText = stringResource(Res.string.save),
             state = state,
             onAction = { action ->
                 when (action) {
@@ -50,15 +57,20 @@ fun CreateChatScreenRoot(
 
 @Preview
 @Composable
-private fun CreateChatScreenPreview() {
+private fun ManageChatScreenPreview() {
     ChirpTheme {
         CreateOrManageChatScreen(
             state = CreateOrManageChatState(
-                selectedChatParticipants = emptyList()
+                selectedChatParticipants = listOf(
+                    ChatParticipantUi(
+                        userId = "123",
+                        username = "Kiran",
+                    )
+                ),
             ),
             onAction = {},
-            headerText = "Create Chat",
-            primaryButtonText = "Create Chat"
+            headerText = "Manage Chat",
+            primaryButtonText = "Save Chat"
         )
     }
 }

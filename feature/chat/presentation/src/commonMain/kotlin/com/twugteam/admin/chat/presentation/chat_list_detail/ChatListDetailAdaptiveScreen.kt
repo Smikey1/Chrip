@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twugteam.admin.chat.presentation.chat_detail.ChatDetailScreenRoot
 import com.twugteam.admin.chat.presentation.chat_list.ChatListScreenRoot
 import com.twugteam.admin.chat.presentation.create_chat.CreateChatScreenRoot
+import com.twugteam.admin.chat.presentation.manage_chat.ManageChatScreenRoot
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.DialogSheetScopedViewModel
 import kotlinx.coroutines.launch
@@ -98,6 +99,9 @@ fun ChatListDetailAdaptiveScreen(
                 ChatDetailScreenRoot(
                     chatId = state.selectedChatId,
                     isDetailScreenPresent = detailPane == PaneAdaptedValue.Expanded && listPane == PaneAdaptedValue.Expanded,
+                    onChatMemberClick = {
+                        viewModel.onAction(ChatListDetailAction.OnManageChatClick)
+                    },
                     onBack = {
                         scope.launch {
                             if (scaffoldNavigator.canNavigateBack()) {
@@ -120,6 +124,20 @@ fun ChatListDetailAdaptiveScreen(
                 scope.launch {
                     scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                 }
+            },
+            onDismiss = {
+                viewModel.onAction(ChatListDetailAction.OnDismissClick)
+            }
+        )
+    }
+
+    DialogSheetScopedViewModel(
+        visible = state.dialogState is DialogState.ManageChat
+    ) {
+        ManageChatScreenRoot(
+            chatId = state.selectedChatId,
+            onMemberAdded = {
+                viewModel.onAction(ChatListDetailAction.OnDismissClick)
             },
             onDismiss = {
                 viewModel.onAction(ChatListDetailAction.OnDismissClick)

@@ -32,7 +32,7 @@ interface ChatMessageDao {
 
 
     @Query("select * from chatmessageentity where messageId = :messageId")
-    fun getMessageById(messageId: String): ChatMessageEntity?
+    suspend fun getMessageById(messageId: String): ChatMessageEntity?
 
     @Query("select * from chatmessageentity where chatId= :chatId order by timestamp desc")
     fun getAllMessagesByChatId(chatId: String): Flow<List<ChatMessageEntity>>

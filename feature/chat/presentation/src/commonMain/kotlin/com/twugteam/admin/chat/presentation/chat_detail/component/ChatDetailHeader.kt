@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.domain.models.ChatMessage
+import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
 import com.twugteam.admin.chat.domain.models.ChatParticipant
 import com.twugteam.admin.chat.presentation.components.ChatHeader
 import com.twugteam.admin.chat.presentation.components.ChatItemHeaderRow
@@ -173,7 +174,8 @@ private fun ChatListHeaderPreview() {
                             chatId = "123",
                             senderId = "123",
                             content = "Hello!, Is there any one in this chat",
-                            createdAt = Clock.System.now()
+                            createdAt = Clock.System.now(),
+                            deliveryStatus = ChatMessageDeliveryStatus.SENT
                         )
                     ).toUi(
                         localParticipantId = "234"

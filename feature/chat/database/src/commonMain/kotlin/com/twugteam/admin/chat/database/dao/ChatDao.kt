@@ -6,6 +6,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.twugteam.admin.chat.database.entities.ChatEntity
 import com.twugteam.admin.chat.database.entities.ChatInfoEntity
+import com.twugteam.admin.chat.database.entities.ChatMessageEntity
 import com.twugteam.admin.chat.database.entities.ChatParticipantCrossRef
 import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
 import com.twugteam.admin.chat.database.entities.ChatWithParticipant
@@ -57,15 +58,19 @@ interface ChatDao {
     )
     fun getActiveParticipantByChatId(chatId: String): Flow<List<ChatParticipantEntity>>
 
-    @Query("select * from chatentity where chatId = :chatId")
+    @Query(
+        """
+        select * from chatentity
+        where chatId = :chatId
+    """
+    )
     @Transaction
-    fun getChatInfoById(chatId: String): Flow<ChatInfoEntity>?
+    fun getChatInfoById(chatId: String): Flow<ChatInfoEntity?>
 
     @Transaction
     suspend fun upsertChatWithParticipantAndCrossRefs(
         chatEntity: ChatEntity,
         participants: List<ChatParticipantEntity>,
-        crossRefs: List<ChatParticipantCrossRef>,
         chatParticipantDao: ChatParticipantDao,
         crossRefDao: ChatParticipantCrossRefDao
     ) {
@@ -91,9 +96,28 @@ interface ChatDao {
     suspend fun upsertChatsWithParticipantAndCrossRefs(
         chatWithParticipants: List<ChatWithParticipant>,
         chatParticipantDao: ChatParticipantDao,
-        crossRefDao: ChatParticipantCrossRefDao
+        crossRefDao: ChatParticipantCrossRefDao,
+        messageDao: ChatMessageDao
     ) {
         upsertChats(chatWithParticipants.map { it.chat })
+
+        val serverChatIds = chatWithParticipants.map { it.chat.chatId }.toSet()
+        val localChatIds = getAllChatIds().toSet()
+        val chatIdsContainInLocalDeviceButNotServerSide = (localChatIds - serverChatIds).toList()
+
+        chatWithParticipants.forEach { chatWithParticipant ->
+            chatWithParticipant.lastMessageView?.run {
+                val chatMessageEntity = ChatMessageEntity(
+                    messageId = messageId,
+                    chatId = chatId,
+                    senderId = senderId,
+                    content = content,
+                    timestamp = timestamp,
+                    deliveryStatus = deliveryStatus
+                )
+                messageDao.upsertMessage(chatMessageEntity)
+            }
+        }
 
         val allParticipants = chatWithParticipants.flatMap {
             it.participants
@@ -117,5 +141,7 @@ interface ChatDao {
                 participants = chatWithParticipant.participants
             )
         }
+
+        deleteChatsByIds(chatIdsContainInLocalDeviceButNotServerSide)
     }
 }
