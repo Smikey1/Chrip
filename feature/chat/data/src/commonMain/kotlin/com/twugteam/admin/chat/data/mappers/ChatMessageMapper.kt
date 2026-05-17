@@ -2,6 +2,7 @@ package com.twugteam.admin.chat.data.mappers
 
 import com.twugteam.admin.chat.data.dto.ChatMessageDto
 import com.twugteam.admin.chat.database.entities.ChatMessageEntity
+import com.twugteam.admin.chat.database.entities.MessageWithSender
 import com.twugteam.admin.chat.database.view.LastMessageView
 import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
@@ -50,7 +51,19 @@ fun LastMessageView.toEntity(): ChatMessageEntity {
         deliveryStatus = deliveryStatus
     )
 }
-fun ChatMessage.toEntity(): ChatMessageEntity{
+
+fun ChatMessageEntity.tDomain(): ChatMessage {
+    return ChatMessage(
+        id = messageId,
+        chatId = chatId,
+        senderId = senderId,
+        content = content,
+        createdAt = Instant.fromEpochMilliseconds(timestamp),
+        deliveryStatus = ChatMessageDeliveryStatus.valueOf(deliveryStatus),
+    )
+}
+
+fun ChatMessage.toEntity(): ChatMessageEntity {
     return ChatMessageEntity(
         messageId = id,
         chatId = chatId,

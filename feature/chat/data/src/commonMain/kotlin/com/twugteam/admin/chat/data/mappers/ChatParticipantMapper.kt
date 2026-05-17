@@ -2,8 +2,6 @@ package com.twugteam.admin.chat.data.mappers
 
 import com.twugteam.admin.chat.data.dto.ChatParticipantDto
 import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
-import com.twugteam.admin.chat.database.entities.ChatWithParticipant
-import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.domain.models.ChatParticipant
 
 fun ChatParticipantDto.toDomain(): ChatParticipant {

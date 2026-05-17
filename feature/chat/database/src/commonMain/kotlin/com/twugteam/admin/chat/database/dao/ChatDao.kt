@@ -11,6 +11,7 @@ import com.twugteam.admin.chat.database.entities.ChatParticipantCrossRef
 import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
 import com.twugteam.admin.chat.database.entities.ChatWithParticipant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.selects.select
 
 @Dao
 interface ChatDao {
@@ -70,15 +71,20 @@ interface ChatDao {
     )
     fun getActiveParticipantByChatId(chatId: String): Flow<List<ChatParticipantEntity>>
 
-    @Query("select * from chatentity where chatId = :chatId")
-    @Transaction
-    fun getChatInfoById(chatId: String): Flow<ChatInfoEntity>?
+    @Query(
+        """
+        select c.* from chatentity c
+        join chatparticipantcrossref cpcr
+        on c.chatId = cpcr.chatId
+        where c.chatId = :chatId and cpcr.isUserStillActiveToThisChat = true
+    """)
+        @Transaction
+    fun getChatInfoById(chatId: String): Flow<ChatInfoEntity?>
 
     @Transaction
     suspend fun upsertChatWithParticipantAndCrossRefs(
         chatEntity: ChatEntity,
         participants: List<ChatParticipantEntity>,
-        crossRefs: List<ChatParticipantCrossRef>,
         chatParticipantDao: ChatParticipantDao,
         crossRefDao: ChatParticipantCrossRefDao
     ) {

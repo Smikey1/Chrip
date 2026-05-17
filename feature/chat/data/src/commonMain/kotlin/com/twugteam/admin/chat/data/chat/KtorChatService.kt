@@ -11,16 +11,15 @@ import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.map
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.request.post
 
 class KtorChatService(
     private val httpClient: HttpClient
-): ChatService {
+) : ChatService {
 
-    companion object{
+    companion object {
         private const val CHAT_ENDPOINT = "/chat"
     }
+
     override suspend fun createChat(otherUserIds: List<String>): Result<Chat, DataError.Remote> {
         return httpClient.post<CreateChatRequest, ChatDto>(
             route = CHAT_ENDPOINT,
@@ -35,10 +34,18 @@ class KtorChatService(
     override suspend fun fetchChats(): Result<List<Chat>, DataError.Remote> {
         return httpClient.get<List<ChatDto>>(
             route = CHAT_ENDPOINT
-        ).map {chatDtos ->
+        ).map { chatDtos ->
             chatDtos.map {
                 it.toDomain()
             }
+        }
+    }
+
+    override suspend fun fetchChatById(chatId: String): Result<Chat, DataError.Remote> {
+        return httpClient.get<ChatDto>(
+            route = "$CHAT_ENDPOINT/$chatId",
+        ).map {
+            it.toDomain()
         }
     }
 }
