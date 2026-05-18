@@ -57,9 +57,9 @@ suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<
 
 fun constructRoute(route: String): String {
     return when {
-        route.contains(UrlConstraints.BASE_URL) -> route
-        route.startsWith("/") -> UrlConstraints.BASE_URL + route
-        else -> "${UrlConstraints.BASE_URL}/$route"
+        route.contains(UrlConstraints.HTTP_BASE_URL) -> route
+        route.startsWith("/") -> UrlConstraints.HTTP_BASE_URL + route
+        else -> "${UrlConstraints.HTTP_BASE_URL}/$route"
     }
 }
 
