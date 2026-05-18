@@ -1,6 +1,7 @@
 package com.twugteam.admin.chat.data.mappers
 
 import com.twugteam.admin.chat.data.dto.ChatMessageDto
+import com.twugteam.admin.chat.data.dto.websocket.OutgoingWebSocketDto
 import com.twugteam.admin.chat.database.entities.ChatMessageEntity
 import com.twugteam.admin.chat.database.entities.MessageWithSender
 import com.twugteam.admin.chat.database.view.LastMessageView
@@ -71,5 +72,13 @@ fun ChatMessage.toEntity(): ChatMessageEntity {
         content = content,
         timestamp = createdAt.toEpochMilliseconds(),
         deliveryStatus = deliveryStatus.name,
+    )
+}
+
+fun ChatMessage.toNewMessageDto(): OutgoingWebSocketDto.NewMessage {
+    return OutgoingWebSocketDto.NewMessage(
+        chatId = chatId,
+        messageId = id,
+        content = content
     )
 }
