@@ -64,7 +64,7 @@ fun List<Chat>.toChatWithParticipants(): List<ChatWithParticipant> {
 
 fun DataMessageWithSender.toDomain(): DomainMessageWithSender {
     return DomainMessageWithSender(
-        message = message.tDomain(),
+        message = message.toDomain(),
         sender = sender.toDomain(),
         deliveryStatus = ChatMessageDeliveryStatus.valueOf(message.deliveryStatus)
     )
