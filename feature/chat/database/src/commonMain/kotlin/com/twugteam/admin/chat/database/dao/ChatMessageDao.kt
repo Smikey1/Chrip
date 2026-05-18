@@ -2,7 +2,6 @@ package com.twugteam.admin.chat.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Upsert
 import com.twugteam.admin.chat.database.entities.ChatMessageEntity
 import kotlinx.coroutines.flow.Flow
@@ -36,5 +35,12 @@ interface ChatMessageDao {
 
     @Query("select * from chatmessageentity where chatId= :chatId order by timestamp desc")
     fun getAllMessagesByChatId(chatId: String): Flow<List<ChatMessageEntity>>
+
+    @Query("""
+        update chatmessageentity
+        set deliveryStatus = :deliveryStatus, deliveryStatusTimestamp= :timestamp
+        where messageId = :messageId
+    """)
+    suspend fun updateDeliveryStatus(messageId: String, deliveryStatus: String, timestamp: Long)
 
 }
