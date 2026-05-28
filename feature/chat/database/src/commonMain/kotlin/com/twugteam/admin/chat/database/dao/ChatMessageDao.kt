@@ -2,9 +2,12 @@ package com.twugteam.admin.chat.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import com.twugteam.admin.chat.database.entities.ChatMessageEntity
+import com.twugteam.admin.chat.database.entities.MessageWithSender
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 @Dao
 interface ChatMessageDao {
@@ -34,13 +37,41 @@ interface ChatMessageDao {
     suspend fun getMessageById(messageId: String): ChatMessageEntity?
 
     @Query("select * from chatmessageentity where chatId= :chatId order by timestamp desc")
-    fun getAllMessagesByChatId(chatId: String): Flow<List<ChatMessageEntity>>
+    fun getAllMessagesByChatId(chatId: String): Flow<List<MessageWithSender>>
 
-    @Query("""
+    @Query("select * from chatmessageentity where chatId= :chatId order by timestamp desc limit :limit")
+    fun getLimitedMessagesByChatId(chatId: String, limit: Int): Flow<List<ChatMessageEntity>>
+
+    @Query(
+        """
         update chatmessageentity
         set deliveryStatus = :deliveryStatus, deliveryStatusTimestamp= :timestamp
         where messageId = :messageId
-    """)
+    """
+    )
     suspend fun updateDeliveryStatus(messageId: String, deliveryStatus: String, timestamp: Long)
+
+    @Transaction
+    suspend fun upsertMessageAndSyncIfNeeded(
+        chatId: String,
+        serverMessages: List<ChatMessageEntity>,
+        pageSize: Int,
+        shouldSync: Boolean = false
+    ) {
+        val localMessages = getLimitedMessagesByChatId(chatId = chatId, limit = pageSize).first()
+
+        upsertMessages(serverMessages)
+        if (!shouldSync) {
+            return
+        }
+        val serverMessagesIds = serverMessages.map { it.messageId }.toSet()
+        val deletedMessageIdsServerSide = localMessages.filter {
+            val missingOnServer = it.messageId !in serverMessagesIds
+            val isSent = it.deliveryStatus == "SENT"
+            missingOnServer && isSent
+        }
+
+        deleteMultipleMessageByIds(messageIds = deletedMessageIdsServerSide.map { it.messageId })
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.twugteam.admin.chat.data.di
 
 import com.twugteam.admin.chat.data.lifecycle.AppLifecycleObserver
+import com.twugteam.admin.chat.data.network.ConnectionErrorHandler
 import com.twugteam.admin.chat.data.network.ConnectivityObserver
 import com.twugteam.admin.chat.database.DatabaseFactory
 import org.koin.core.module.dsl.singleOf
@@ -11,4 +12,5 @@ actual val platformChatDataModule = module {
 
     singleOf(::AppLifecycleObserver)
     singleOf(::ConnectivityObserver)
+    singleOf(::ConnectionErrorHandler)
 }

@@ -70,6 +70,9 @@ fun ChatDetailScreenRoot(
         when (event) {
             is ChatDetailEvent.OnChatLeft -> onBack()
             is ChatDetailEvent.OnError -> snackbarState.showSnackbar(event.error.asStringAsync())
+            is ChatDetailEvent.OnNewMessage -> {
+
+            }
         }
     }
 

@@ -2,20 +2,25 @@ package com.twugteam.admin.chat.presentation.chat_list_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.twugteam.admin.chat.domain.chat.ChatRealTimeService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
-class ChatListDetailViewModel : ViewModel() {
+class ChatListDetailViewModel(
+    private val chatRealTimeService: ChatRealTimeService
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
     private val _state = MutableStateFlow(ChatListDetailState())
     val state = _state
-        .onEach {
+        .onStart {
             if (!hasLoadedInitialData) {
-
+                chatRealTimeService.chatMessage.launchIn(viewModelScope)
                 hasLoadedInitialData = true
             }
         }
