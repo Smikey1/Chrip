@@ -1,26 +1,41 @@
 package com.twugteam.admin.chat.data.message
 
+import com.twugteam.admin.chat.data.dto.websocket.OutgoingWebSocketDto
+import com.twugteam.admin.chat.data.dto.websocket.WebSocketMessageDto
 import com.twugteam.admin.chat.data.mappers.toDomain
 import com.twugteam.admin.chat.data.mappers.toEntity
+import com.twugteam.admin.chat.data.mappers.toWebSocketDto
+import com.twugteam.admin.chat.data.network.KtorWebSocketConnector
 import com.twugteam.admin.chat.database.ChirpChatDatabase
 import com.twugteam.admin.chat.domain.message.ChatMessageService
 import com.twugteam.admin.chat.domain.message.MessageRepository
 import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
 import com.twugteam.admin.chat.domain.models.MessageWithSender
+import com.twugteam.admin.chat.domain.models.OutgoingNewMessage
 import com.twugteam.admin.core.data.database.safeDatabaseUpdate
+import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import kotlin.time.Clock
 
 class OfflineFirstMessageRepository(
     private val db: ChirpChatDatabase,
-    private val chatMessageService: ChatMessageService
+    private val chatMessageService: ChatMessageService,
+    private val sessionStorage: SessionStorage,
+    private val webSocketConnector: KtorWebSocketConnector,
+    private val applicationScope: CoroutineScope,
+    private val json: Json
 ) : MessageRepository {
     override suspend fun updateMessageDeliveryStatus(
         messageId: String,
@@ -65,5 +80,37 @@ class OfflineFirstMessageRepository(
                     it.toDomain()
                 }
             }
+    }
+
+    override suspend fun sendMessage(message: OutgoingNewMessage): EmptyResult<DataError> {
+        return safeDatabaseUpdate {
+            val localUser = sessionStorage.observeAuthInfo().firstOrNull()?.user
+                ?: return Result.Failure(DataError.Local.NOT_FOUND)
+            val outgoingNewMessageDto = message.toWebSocketDto()
+            val messageEntity = message.toEntity(
+                senderId = localUser.id,
+                deliveryStatus = ChatMessageDeliveryStatus.SENT
+            )
+            db.chatMessageDao.upsertMessage(messageEntity)
+            return webSocketConnector
+                .sendMessage(outgoingNewMessageDto.toJsonPayload())
+                .onFailure { error ->
+                    applicationScope.launch {
+                        db.chatMessageDao.upsertMessage(
+                            messageEntity.copy(
+                                deliveryStatus = ChatMessageDeliveryStatus.FAILED.name
+                            )
+                        )
+                    }.join()
+                }
+        }
+    }
+
+    private fun OutgoingWebSocketDto.NewMessage.toJsonPayload(): String {
+        val webSocketMessageDto = WebSocketMessageDto(
+            type = type.name,
+            payload = json.encodeToString(this)
+        )
+        return json.encodeToString(webSocketMessageDto)
     }
 }

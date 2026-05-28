@@ -1,14 +1,16 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 
 package com.twugteam.admin.chat.presentation.chat_detail
 
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.chat.domain.chat.ChatRealTimeService
 import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.domain.message.MessageRepository
 import com.twugteam.admin.chat.domain.models.NetworkConnectionState
+import com.twugteam.admin.chat.domain.models.OutgoingNewMessage
 import com.twugteam.admin.chat.presentation.mappers.toUi
 import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.utils.onFailure
@@ -30,6 +32,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
@@ -49,6 +53,25 @@ class ChatDetailViewModel(
                 chatRepository.getChatInfoById(chatId)
             } else emptyFlow()
         }
+
+    private val canSendMessage = snapshotFlow {
+        _state.value.messageTextFieldState.text.toString()
+    }.map {
+        it.isBlank()
+    }.combine(webSocketService.connectionState) { isMessageBlank, connectionState ->
+        !isMessageBlank && connectionState == NetworkConnectionState.CONNECTED
+    }
+
+    private fun observeCanSendMessage() {
+        canSendMessage.onEach { canSend ->
+            _state.update {
+                it.copy(
+                    canSendMessage = canSend
+                )
+            }
+        }.launchIn(viewModelScope)
+    }
+
 
     private val _state = MutableStateFlow(ChatDetailState())
 
@@ -73,6 +96,7 @@ class ChatDetailViewModel(
         if (!hasLoadedInitialData) {
             observeConnectionState()
             observeChatMessages()
+            observeCanSendMessage()
             hasLoadedInitialData = true
         }
     }
@@ -89,7 +113,31 @@ class ChatDetailViewModel(
             ChatDetailAction.OnChatMembersClick -> onDismissChatOptionClick()
             ChatDetailAction.OnChatOptionsClick -> onChatOptionClick()
             ChatDetailAction.OnDismissChatOptions -> onDismissChatOptionClick()
+            ChatDetailAction.OnSendMessageClick -> sendMessage()
             else -> Unit
+        }
+    }
+
+    private fun sendMessage() {
+        val currentChatId = _chatId.value
+        val messageContent = state.value.messageTextFieldState.text.toString().trim()
+        if (currentChatId == null || messageContent.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            val message = OutgoingNewMessage(
+                chatId = currentChatId,
+                messageId = Uuid.random().toString(),
+                content = messageContent
+            )
+            messageRepository
+                .sendMessage(message)
+                .onSuccess {
+                    state.value.messageTextFieldState.clearText()
+                }
+                .onFailure { error ->
+                    eventChannel.send(ChatDetailEvent.OnError(error.toUiText()))
+                }
         }
     }
 

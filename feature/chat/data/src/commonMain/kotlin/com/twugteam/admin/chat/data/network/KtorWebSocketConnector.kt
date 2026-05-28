@@ -4,11 +4,11 @@ package com.twugteam.admin.chat.data.network
 
 import com.twugteam.admin.chat.data.dto.websocket.WebSocketMessageDto
 import com.twugteam.admin.chat.data.lifecycle.AppLifecycleObserver
-import com.twugteam.admin.chat.domain.error.WebSocketConnectionError
 import com.twugteam.admin.chat.domain.models.NetworkConnectionState
 import com.twugteam.admin.core.data.networking.UrlConstraints
 import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.logging.ChripLogger
+import com.twugteam.admin.core.domain.utils.DataError
 import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.feature.chat.data.BuildKonfig
@@ -217,11 +217,11 @@ class KtorWebSocketConnector(
         }
     }
 
-    suspend fun sendMessage(message: String): EmptyResult<WebSocketConnectionError> {
+    suspend fun sendMessage(message: String): EmptyResult<DataError.WebSocketConnectionError> {
         val connectionState = connectionState.value
 
         if (currentWebSocketSession == null || connectionState != NetworkConnectionState.CONNECTED) {
-            return Result.Failure(WebSocketConnectionError.NOT_CONNECTED)
+            return Result.Failure(DataError.WebSocketConnectionError.NOT_CONNECTED)
         }
         return try {
             currentWebSocketSession?.send(message)
@@ -230,7 +230,7 @@ class KtorWebSocketConnector(
 //            if (e is CancellationException) throw e
             currentCoroutineContext().ensureActive()
             logger.error("Unable to send a message", e)
-            Result.Failure(WebSocketConnectionError.MESSAGE_SEND_FAILED)
+            Result.Failure(DataError.WebSocketConnectionError.MESSAGE_SEND_FAILED)
         }
     }
 

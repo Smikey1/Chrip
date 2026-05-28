@@ -198,7 +198,7 @@ private fun ChatDetailScreenRootScreen(
                             InputMessageBox(
                                 messageTextFieldState = state.messageTextFieldState,
                                 connectionState = state.networkConnectionState,
-                                isTextInputFieldEnable = state.canSendMessage,
+                                isSendButtonEnabled = state.canSendMessage,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(
@@ -223,7 +223,7 @@ private fun ChatDetailScreenRootScreen(
                             InputMessageBox(
                                 messageTextFieldState = state.messageTextFieldState,
                                 connectionState = state.networkConnectionState,
-                                isTextInputFieldEnable = state.canSendMessage,
+                                isSendButtonEnabled = state.canSendMessage,
                                 modifier = Modifier.fillMaxWidth().padding(8.dp),
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)

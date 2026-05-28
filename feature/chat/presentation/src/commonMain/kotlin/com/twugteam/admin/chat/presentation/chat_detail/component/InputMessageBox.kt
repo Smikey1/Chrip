@@ -27,17 +27,15 @@ import com.twugteam.admin.core.designsystem.theme.ChirpTheme
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.feature.chat.presentation.Res
 import com.twugteam.admin.feature.chat.presentation.cloud_off_icon
-import com.twugteam.admin.feature.chat.presentation.offline
 import com.twugteam.admin.feature.chat.presentation.send
 import com.twugteam.admin.feature.chat.presentation.send_a_message
-import com.twugteam.admin.feature.chat.presentation.sent
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun InputMessageBox(
     messageTextFieldState: TextFieldState,
-    isTextInputFieldEnable: Boolean,
+    isSendButtonEnabled: Boolean,
     connectionState: NetworkConnectionState,
     onSendClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -47,7 +45,6 @@ fun InputMessageBox(
         state = messageTextFieldState,
         modifier = modifier,
         placeholder = stringResource(Res.string.send_a_message),
-        enabled = isTextInputFieldEnable,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Send
         ),
@@ -75,7 +72,7 @@ fun InputMessageBox(
         ChirpButton(
             text = stringResource(Res.string.send),
             onClick = onSendClick,
-            enabled = isConnected
+            enabled = isConnected && isSendButtonEnabled
         )
     }
 }
@@ -96,7 +93,7 @@ private fun InputMessageBoxPreview() {
             InputMessageBox(
                 messageTextFieldState = TextFieldState(),
                 connectionState = NetworkConnectionState.ERROR_NETWORK,
-                isTextInputFieldEnable = true,
+                isSendButtonEnabled = false,
                 onSendClick = {},
                 modifier = Modifier.fillMaxSize()
             )
