@@ -2,6 +2,7 @@ package com.twugteam.admin.chat.domain.message
 
 import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.core.domain.utils.DataError
+import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 
 interface ChatMessageService {
@@ -9,4 +10,6 @@ interface ChatMessageService {
         chatId: String,
         before: String? = null
     ): Result<List<ChatMessage>, DataError.Remote>
+
+    suspend fun deleteMessage(messageId: String): EmptyResult<DataError.Remote>
 }

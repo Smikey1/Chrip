@@ -19,7 +19,8 @@ data class ChatDetailState(
     val isPaginationEndReached: Boolean = false,
     val bannerState: BannerState = BannerState(),
     val isNearBottomInMessageList: Boolean = false,
-    val networkConnectionState: NetworkConnectionState = NetworkConnectionState.DISCONNECTED
+    val networkConnectionState: NetworkConnectionState = NetworkConnectionState.DISCONNECTED,
+    val messageWithMenuOpen: MessageUi.LocalUserMessage? = null,
 )
 
 data class BannerState(

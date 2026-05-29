@@ -186,6 +186,7 @@ private fun ChatDetailScreenRootScreen(
                         MessageList(
                             messages = state.messages,
                             listState = messageListState,
+                            messageWithMenuOpen = state.messageWithMenuOpen,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),
@@ -200,7 +201,7 @@ private fun ChatDetailScreenRootScreen(
                             },
                             onMessageLongClick = {
                                 onAction(ChatDetailAction.OnMessageLongClick(it))
-                            }
+                            },
                         )
                         AnimatedVisibility(
                             visible = !currentDeviceConfiguration.isWideScreen
@@ -282,7 +283,6 @@ private fun ChatDetailScreenRootScreenPreview() {
                         MessageUi.LocalUserMessage(
                             id = "121",
                             content = "Hey",
-                            isMenuOpen = false,
                             formattedSentTime = UiText.DynamicString("now"),
                             deliveryStatus = ChatMessageDeliveryStatus.FAILED
                         )
@@ -297,7 +297,7 @@ private fun ChatDetailScreenRootScreenPreview() {
                             )
                         )
                     }
-                }
+                },
             ),
             onAction = {},
             isDetailScreenPresent = true,

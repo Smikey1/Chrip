@@ -34,6 +34,7 @@ import org.jetbrains.compose.resources.vectorResource
 @Composable
 fun LocalUserMessage(
     message: MessageUi.LocalUserMessage,
+    messageWithMenuOpen: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -63,7 +64,7 @@ fun LocalUserMessage(
             )
 
             ChirpDropdownMenu(
-                isDropdownMenuOpen = message.isMenuOpen,
+                isDropdownMenuOpen = messageWithMenuOpen?.id == message.id,
                 onDismissClick = onDismissMessageMenu,
                 items = listOf(
                     ChirpDropdownMenuItem(
@@ -101,10 +102,10 @@ private fun LocalUserMessagePreview() {
             onRetryClick = {},
             onDeleteClick = {},
             onDismissMessageMenu = {},
+            messageWithMenuOpen = null,
             message = MessageUi.LocalUserMessage(
                 id = "121",
                 content = "Hey how are you",
-                isMenuOpen = false,
                 formattedSentTime = UiText.DynamicString("now"),
                 deliveryStatus = ChatMessageDeliveryStatus.FAILED
             )

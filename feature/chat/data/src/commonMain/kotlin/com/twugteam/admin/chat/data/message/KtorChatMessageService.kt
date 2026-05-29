@@ -4,8 +4,10 @@ import com.twugteam.admin.chat.data.dto.ChatMessageDto
 import com.twugteam.admin.chat.data.mappers.toDomain
 import com.twugteam.admin.chat.domain.message.ChatMessageService
 import com.twugteam.admin.chat.domain.models.ChatMessage
+import com.twugteam.admin.core.data.networking.delete
 import com.twugteam.admin.core.data.networking.get
 import com.twugteam.admin.core.domain.utils.DataError
+import com.twugteam.admin.core.domain.utils.EmptyResult
 import com.twugteam.admin.core.domain.utils.Result
 import com.twugteam.admin.core.domain.utils.map
 import io.ktor.client.HttpClient
@@ -31,6 +33,12 @@ class KtorChatMessageService(
                 it.toDomain()
             }
         }
+    }
+
+    override suspend fun deleteMessage(messageId: String): EmptyResult<DataError.Remote> {
+        return httpClient.delete(
+            route = "/messages/$messageId"
+        )
     }
 
 }

@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 fun MessageList(
     messages: List<MessageUi>,
     listState: LazyListState,
+    messageWithMenuOpen: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDeleteMessageClick: (MessageUi.LocalUserMessage) -> Unit,
     onMessageRetryClick: (MessageUi.LocalUserMessage) -> Unit,
@@ -61,6 +62,7 @@ fun MessageList(
                 MessageListItemUi(
                     messageUi = message,
                     onDismissMessageMenu = onDismissMessageMenu,
+                    messageWithMenuOpen = messageWithMenuOpen,
                     onDeleteClick = {
                         onDeleteMessageClick(it)
                     },
@@ -95,7 +97,6 @@ private fun MessageListPreview() {
                 MessageUi.LocalUserMessage(
                     id = "121",
                     content = "Hey",
-                    isMenuOpen = false,
                     formattedSentTime = UiText.DynamicString("now"),
                     deliveryStatus = ChatMessageDeliveryStatus.FAILED
                 ),
@@ -118,6 +119,7 @@ private fun MessageListPreview() {
                     )
                 )
             ),
+            messageWithMenuOpen = null,
             listState = rememberLazyListState(),
         )
 
