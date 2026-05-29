@@ -6,7 +6,6 @@ import com.twugteam.admin.chat.domain.chat.ChatRealTimeService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -33,7 +32,7 @@ class ChatListDetailViewModel(
 
     fun onAction(action: ChatListDetailAction) {
         when (action) {
-            is ChatListDetailAction.OnChatClick -> {
+            is ChatListDetailAction.OnSelectClick -> {
                 _state.update {
                     it.copy(
                         selectedChatId = action.chatId

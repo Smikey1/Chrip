@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -51,6 +52,8 @@ import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
 import com.twugteam.admin.feature.chat.presentation.Res
 import com.twugteam.admin.feature.chat.presentation.no_chat_selected
 import com.twugteam.admin.feature.chat.presentation.select_a_chat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -80,10 +83,17 @@ fun ChatDetailScreenRoot(
         viewModel.onAction(ChatDetailAction.OnSelectChat(chatId))
     }
 
+    val scope = rememberCoroutineScope()
+
     BackHandler(
         enabled = !isDetailScreenPresent
     ) {
-        viewModel.onAction(ChatDetailAction.OnSelectChat(null))
+        scope.launch {
+            // Add artificial delay to prevent details back animation from showing
+            // an unselected chat at the moment we go back
+            delay(300)
+            viewModel.onAction(ChatDetailAction.OnSelectChat(null))
+        }
         onBack()
     }
 
