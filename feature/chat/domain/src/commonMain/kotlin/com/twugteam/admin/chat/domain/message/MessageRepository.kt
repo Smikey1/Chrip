@@ -15,9 +15,14 @@ interface MessageRepository {
         status: ChatMessageDeliveryStatus
     ): EmptyResult<DataError.Local>
 
-    suspend fun fetchMessage(chatId: String, before: String? = null): Result<List<ChatMessage>,DataError>
+    suspend fun fetchMessage(
+        chatId: String,
+        before: String? = null
+    ): Result<List<ChatMessage>, DataError>
 
     fun getMessageForChat(chatId: String): Flow<List<MessageWithSender>>
 
     suspend fun sendMessage(message: OutgoingNewMessage): EmptyResult<DataError>
+
+    suspend fun retryMessage(messageId: String): EmptyResult<DataError>
 }

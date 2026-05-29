@@ -24,7 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
@@ -96,10 +95,41 @@ class OfflineFirstMessageRepository(
                 .sendMessage(outgoingNewMessageDto.toJsonPayload())
                 .onFailure { error ->
                     applicationScope.launch {
-                        db.chatMessageDao.upsertMessage(
-                            messageEntity.copy(
-                                deliveryStatus = ChatMessageDeliveryStatus.FAILED.name
-                            )
+                        db.chatMessageDao.updateDeliveryStatus(
+                            messageId = messageEntity.messageId,
+                            deliveryStatus = ChatMessageDeliveryStatus.FAILED.name,
+                            timestamp = Clock.System.now().toEpochMilliseconds()
+
+                        )
+                    }.join()
+                }
+        }
+    }
+
+    override suspend fun retryMessage(messageId: String): EmptyResult<DataError> {
+        return safeDatabaseUpdate {
+            val message = db.chatMessageDao.getMessageById(messageId)
+                ?: return Result.Failure(DataError.Local.NOT_FOUND)
+
+            db.chatMessageDao.updateDeliveryStatus(
+                messageId = messageId,
+                deliveryStatus = ChatMessageDeliveryStatus.SENDING.name,
+                timestamp = Clock.System.now().toEpochMilliseconds()
+            )
+            val outgoingNewMessage = OutgoingWebSocketDto.NewMessage(
+                chatId = message.chatId,
+                content = message.content,
+                messageId = messageId
+            )
+            webSocketConnector
+                .sendMessage(outgoingNewMessage.toJsonPayload())
+                .onFailure { error ->
+                    applicationScope.launch {
+                        db.chatMessageDao.updateDeliveryStatus(
+                            messageId = message.chatId,
+                            deliveryStatus = ChatMessageDeliveryStatus.FAILED.name,
+                            timestamp = Clock.System.now().toEpochMilliseconds()
+
                         )
                     }.join()
                 }

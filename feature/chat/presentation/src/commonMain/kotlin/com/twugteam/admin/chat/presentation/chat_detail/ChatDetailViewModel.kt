@@ -12,6 +12,7 @@ import com.twugteam.admin.chat.domain.message.MessageRepository
 import com.twugteam.admin.chat.domain.models.NetworkConnectionState
 import com.twugteam.admin.chat.domain.models.OutgoingNewMessage
 import com.twugteam.admin.chat.presentation.mappers.toUi
+import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
@@ -85,6 +86,7 @@ class ChatDetailViewModel(
         }
         currentState.copy(
             chatUi = chatInfo.chat.toUi(authInfo.user.id),
+            messages = chatInfo.messages.map { it.toUi(authInfo.user.id) }
         )
     }
 
@@ -114,7 +116,18 @@ class ChatDetailViewModel(
             ChatDetailAction.OnChatOptionsClick -> onChatOptionClick()
             ChatDetailAction.OnDismissChatOptions -> onDismissChatOptionClick()
             ChatDetailAction.OnSendMessageClick -> sendMessage()
+            is ChatDetailAction.OnRetryClick -> onRetryMessageClick(action.message)
             else -> Unit
+        }
+    }
+
+    private fun onRetryMessageClick(message: MessageUi.LocalUserMessage) {
+        viewModelScope.launch {
+            messageRepository
+                .retryMessage(message.id)
+                .onFailure { error ->
+                    eventChannel.send(ChatDetailEvent.OnError(error.toUiText()))
+                }
         }
     }
 
@@ -188,17 +201,6 @@ class ChatDetailViewModel(
                 if (chatId != null) {
                     messageRepository.getMessageForChat(chatId)
                 } else emptyFlow()
-            }
-            .combine(sessionStorage.observeAuthInfo()) { messages, authInfo ->
-                if (authInfo == null) {
-                    return@combine messages
-                }
-                _state.update {
-                    it.copy(
-                        messages = messages.map { it.toUi(authInfo.user.id) }
-                    )
-                }
-                messages
             }
 
         val isNearBottom = state.map { it.isNearBottomInMessageList }.distinctUntilChanged()

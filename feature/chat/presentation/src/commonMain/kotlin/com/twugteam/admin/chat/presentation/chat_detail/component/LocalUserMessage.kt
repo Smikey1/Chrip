@@ -46,7 +46,7 @@ fun LocalUserMessage(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
     ) {
-        Box{
+        Box {
             ChirpChatBubble(
                 messageContent = message.content,
                 sender = stringResource(Res.string.you),
@@ -103,7 +103,7 @@ private fun LocalUserMessagePreview() {
             onDismissMessageMenu = {},
             message = MessageUi.LocalUserMessage(
                 id = "121",
-                content = "Hey",
+                content = "Hey how are you",
                 isMenuOpen = false,
                 formattedSentTime = UiText.DynamicString("now"),
                 deliveryStatus = ChatMessageDeliveryStatus.FAILED
