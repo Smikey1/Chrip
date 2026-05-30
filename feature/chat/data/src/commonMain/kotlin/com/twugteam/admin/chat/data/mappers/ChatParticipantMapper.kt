@@ -3,6 +3,7 @@ package com.twugteam.admin.chat.data.mappers
 import com.twugteam.admin.chat.data.dto.ChatParticipantDto
 import com.twugteam.admin.chat.database.entities.ChatParticipantEntity
 import com.twugteam.admin.chat.domain.models.ChatParticipant
+import com.twugteam.admin.core.domain.auth.User
 
 fun ChatParticipantDto.toDomain(): ChatParticipant {
     return ChatParticipant(
@@ -20,11 +21,16 @@ fun ChatParticipantEntity.toDomain(): ChatParticipant {
     )
 }
 
-fun ChatParticipant.toEntity(): ChatParticipantEntity {
-    return ChatParticipantEntity(
-        userId = userId,
+fun ChatParticipant.toUser(
+    email: String,
+    hasVerifiedEmail: Boolean
+): User {
+    return User(
+        id = userId,
         username = username,
-        profilePictureUrl = profilePictureUrl
+        profilePictureUrl = profilePictureUrl,
+        email = email,
+        hasVerifiedEmail = hasVerifiedEmail
     )
 }
 

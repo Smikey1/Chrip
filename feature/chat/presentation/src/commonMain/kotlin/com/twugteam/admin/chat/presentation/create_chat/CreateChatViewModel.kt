@@ -6,7 +6,7 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.twugteam.admin.chat.domain.chat.ChatParticipantService
+import com.twugteam.admin.chat.domain.participant.ChatParticipantService
 import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.presentation.components.create_or_manage_chat.CreateOrManageChatAction
 import com.twugteam.admin.chat.presentation.components.create_or_manage_chat.CreateOrManageChatState

@@ -107,7 +107,7 @@ class KtorAuthService(
         newPassword: String
     ): EmptyResult<DataError.Remote> {
         return httpClient.post(
-            route = RESET_PASSWORD_ENDPOINT,
+            route = CHANGE_PASSWORD_ENDPOINT,
             body = ChangePasswordRequest(
                 newPassword = newPassword,
                 oldPassword = oldPassword
