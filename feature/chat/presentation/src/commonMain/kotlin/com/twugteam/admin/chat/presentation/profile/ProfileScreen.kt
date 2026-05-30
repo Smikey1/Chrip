@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twugteam.admin.chat.presentation.profile.components.ProfileAdaptiveLayout
 import com.twugteam.admin.chat.presentation.profile.components.ProfileHeaderSection
+import com.twugteam.admin.chat.presentation.profile.mediapicker.rememberImagePickerLauncher
 import com.twugteam.admin.core.designsystem.components.avatar.AvatarSize
 import com.twugteam.admin.core.designsystem.components.avatar.ChripAvatarPhoto
 import com.twugteam.admin.core.designsystem.components.buttons.ChirpButton
@@ -68,6 +68,14 @@ fun ProfileScreenRoot(
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val photoPickerLauncher = rememberImagePickerLauncher { pickedImageData ->
+        viewModel.onAction(ProfileAction.OnPictureSelected(
+            bytes = pickedImageData.bytes,
+            mimeType = pickedImageData.mimeType
+        ))
+    }
+
     ChirpAdaptiveDialogSheetLayout(
         onDismiss = onDismiss
     ) {
@@ -76,6 +84,7 @@ fun ProfileScreenRoot(
             onAction = { action ->
                 when (action) {
                     ProfileAction.OnDismiss -> onDismiss()
+                    ProfileAction.OnUploadPictureClick -> photoPickerLauncher.launch()
                     else -> Unit
                 }
                 viewModel.onAction(action)
