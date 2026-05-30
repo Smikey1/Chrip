@@ -7,6 +7,7 @@ import com.twugteam.admin.feature.chat.presentation.today_x
 import com.twugteam.admin.feature.chat.presentation.yesterday
 import com.twugteam.admin.feature.chat.presentation.yesterday_x
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -27,7 +28,7 @@ object DateUtils {
                 chars(":")
                 minute()
                 chars(":")
-                amPmMarker("am","pm")
+                amPmMarker("am", "pm")
             }
         )
         val formattedDateTime = messageDateTime.format(
@@ -42,10 +43,31 @@ object DateUtils {
                 chars(formattedTime)
             }
         )
-        return when(messageDateTime.date){
+        return when (messageDateTime.date) {
             todayDate -> UiText.Resource(Res.string.today_x, arrayOf(formattedTime))
             yesterdayDate -> UiText.Resource(Res.string.yesterday_x, arrayOf(formattedTime))
             else -> UiText.DynamicString(formattedDateTime)
+        }
+    }
+
+    fun formatDateSeparator(date: LocalDate, clock: Clock = Clock.System): UiText {
+        val timeZone = TimeZone.currentSystemDefault()
+        val today = clock.now().toLocalDateTime(timeZone).date
+        val yesterday = today.minus(1, DateTimeUnit.DAY)
+
+        val formattedDate = date.format(
+            LocalDate.Format {
+                day()
+                chars("/")
+                monthNumber()
+                chars("/")
+                year()
+            }
+        )
+        return when (date) {
+            today -> UiText.Resource(Res.string.today)
+            yesterday -> UiText.Resource(Res.string.yesterday)
+            else -> UiText.DynamicString(formattedDate)
         }
     }
 }

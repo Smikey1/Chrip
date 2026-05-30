@@ -3,6 +3,9 @@ package com.twugteam.admin.chat.presentation.mappers
 import com.twugteam.admin.chat.domain.models.MessageWithSender
 import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.chat.presentation.util.DateUtils
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 fun MessageWithSender.toUi(
     localUserId: String,
@@ -28,5 +31,13 @@ fun MessageWithSender.toUi(
 fun List<MessageWithSender>.toUiList(localUserId: String): List<MessageUi> {
     return this
         .sortedByDescending { it.message.createdAt }
-        .map { it.toUi(localUserId) }
+        .groupBy {
+            it.message.createdAt.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        }
+        .flatMap { (date, messages)->
+            messages.map { it.toUi(localUserId) } + MessageUi.DateSeparator(
+                id = date.toString(),
+                date = DateUtils.formatDateSeparator(date)
+            )
+        }
 }
