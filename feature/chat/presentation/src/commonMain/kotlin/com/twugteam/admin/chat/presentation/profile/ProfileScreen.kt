@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -37,6 +39,7 @@ import com.twugteam.admin.core.designsystem.components.divider.ChirpHorizontalDi
 import com.twugteam.admin.core.designsystem.components.textfields.ChirpPasswordTextField
 import com.twugteam.admin.core.designsystem.components.textfields.ChirpTextField
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
+import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.DeviceConfiguration
 import com.twugteam.admin.core.presentation.util.clearFocusOnTapOutside
 import com.twugteam.admin.core.presentation.util.getCurrentDeviceConfiguration
@@ -49,6 +52,7 @@ import com.twugteam.admin.feature.chat.presentation.delete_profile_picture_desc
 import com.twugteam.admin.feature.chat.presentation.email
 import com.twugteam.admin.feature.chat.presentation.new_password
 import com.twugteam.admin.feature.chat.presentation.password
+import com.twugteam.admin.feature.chat.presentation.password_change_successful
 import com.twugteam.admin.feature.chat.presentation.password_hint
 import com.twugteam.admin.feature.chat.presentation.profile_image
 import com.twugteam.admin.feature.chat.presentation.save
@@ -192,8 +196,7 @@ private fun ProfileScreen(
                     onAction(ProfileAction.OnToggleCurrentPasswordVisibilityClick)
                 },
                 placeholder = stringResource(Res.string.password),
-                isError = state.currentPasswordError != null,
-                supportingText = state.currentPasswordError?.asString()
+                isError = state.newPasswordError != null
             )
 
             ChirpPasswordTextField(
@@ -207,6 +210,16 @@ private fun ProfileScreen(
                 supportingText = state.newPasswordError?.asString()
                     ?: stringResource(Res.string.password_hint)
             )
+
+            if(state.isChangePasswordSuccessful){
+                Text(
+                    text = stringResource(Res.string.password_change_successful),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.extended.success,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Row(
                 modifier = Modifier

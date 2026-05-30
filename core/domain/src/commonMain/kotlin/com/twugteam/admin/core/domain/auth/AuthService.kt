@@ -18,5 +18,11 @@ interface AuthService {
     suspend fun login(email: String, password: String): Result<AuthInfo, DataError.Remote>
 
     suspend fun forgotPassword(email: String): EmptyResult<DataError.Remote>
+
     suspend fun resetPassword(newPassword: String, token: String): EmptyResult<DataError.Remote>
+
+    suspend fun changePassword(
+        oldPassword: String,
+        newPassword: String
+    ): EmptyResult<DataError.Remote>
 }

@@ -17,8 +17,8 @@ data class ProfileState(
     val isNewPasswordVisible: Boolean = false,
     val isChangingPassword: Boolean = false,
     val canChangePassword: Boolean = false,
-    val currentPasswordError: UiText? = null,
     val newPasswordError: UiText? = null,
+    val isChangePasswordSuccessful: Boolean = false
 ) {
     val userInitials = username.take(2)
 }
