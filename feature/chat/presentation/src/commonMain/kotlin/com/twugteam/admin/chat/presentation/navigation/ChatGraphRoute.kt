@@ -6,4 +6,7 @@ sealed interface ChatGraphRoute {
     @Serializable
     data object ChatGraph: ChatGraphRoute
 
+    @Serializable
+    data object ChatListDetail: ChatGraphRoute
+
 }
