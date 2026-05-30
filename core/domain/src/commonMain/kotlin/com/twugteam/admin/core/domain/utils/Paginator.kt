@@ -10,7 +10,7 @@ class Paginator<Key, Item>(
     private val onLoadUpdated: (Boolean) -> Unit,
     private val onRequest: suspend (nextKey: Key) -> Result<List<Item>, DataError>,
     private val getNextKey: suspend (fromItems: List<Item>) -> Key,
-    private val onError: (Throwable?) -> Unit,
+    private val onError: suspend (Throwable?) -> Unit,
     private val onSuccess: suspend (items: List<Item>, newKey: Key) -> Unit
 
 ) {
