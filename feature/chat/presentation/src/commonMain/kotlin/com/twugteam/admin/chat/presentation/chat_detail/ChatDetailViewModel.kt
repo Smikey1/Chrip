@@ -20,7 +20,10 @@ import com.twugteam.admin.core.domain.utils.DataErrorException
 import com.twugteam.admin.core.domain.utils.Paginator
 import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
+import com.twugteam.admin.core.presentation.util.UiText
 import com.twugteam.admin.core.presentation.util.toUiText
+import com.twugteam.admin.feature.chat.presentation.Res
+import com.twugteam.admin.feature.chat.presentation.today
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,7 +139,63 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnMessageLongClick -> onMessageLongClick(action.message)
             ChatDetailAction.OnScrollToTop -> onScrollToTop()
             ChatDetailAction.OnPaginationRetryClick -> retryPagination()
+            ChatDetailAction.OnHideBanner -> hideBanner()
+            is ChatDetailAction.OnFirstVisibleIndexChanged -> autoScrollToBottom(action.index)
+            is ChatDetailAction.OnScrollBannerIndexChanged -> onScrollBannerIndexChanged(action.topVisibleIndex)
             else -> Unit
+        }
+    }
+
+    private fun autoScrollToBottom(index: Int) {
+        _state.update {
+            it.copy(
+                isNearBottomInMessageList = index <= 3
+            )
+        }
+    }
+
+    private fun onScrollBannerIndexChanged(topVisibleIndex: Int) {
+       val visibleDate = calculateBannerDateFromIndex(
+           messages = state.value.messages,
+           index = topVisibleIndex
+       )
+        _state.update {
+            it.copy(
+                bannerState = it.bannerState.copy(
+                    formattedDate = visibleDate,
+                    isVisible = visibleDate != null
+                )
+            )
+        }
+    }
+
+    private fun calculateBannerDateFromIndex(
+        messages: List<MessageUi>,
+        index: Int
+    ): UiText? {
+        if(messages.isEmpty() || index <=0 || index>= messages.size) {
+            return null
+        }
+        val nearestDateSeparator = (index until messages.size)
+            .asSequence()
+            .mapNotNull { index ->
+                val item = messages.getOrNull(index)
+                if(item is MessageUi.DateSeparator) item.date else null
+            }
+            .firstOrNull()
+
+        return when(nearestDateSeparator) {
+            is UiText.Resource -> {
+                if(nearestDateSeparator.resId == Res.string.today) null else nearestDateSeparator
+            } else -> nearestDateSeparator
+        }
+    }
+
+    private fun hideBanner(){
+        _state.update {
+            it.copy(
+                bannerState = it.bannerState.copy(isVisible = false)
+            )
         }
     }
 

@@ -3,6 +3,8 @@
 package com.twugteam.admin.chat.presentation.chat_detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,8 +26,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -32,13 +38,17 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
 import com.twugteam.admin.chat.presentation.chat_detail.component.ChatDetailHeader
+import com.twugteam.admin.chat.presentation.chat_detail.component.DateChip
 import com.twugteam.admin.chat.presentation.chat_detail.component.InputMessageBox
+import com.twugteam.admin.chat.presentation.chat_detail.component.MessageBannerListener
 import com.twugteam.admin.chat.presentation.chat_detail.component.MessageList
 import com.twugteam.admin.chat.presentation.chat_detail.component.PaginationScrollListener
 import com.twugteam.admin.chat.presentation.components.ChatHeader
@@ -56,6 +66,7 @@ import com.twugteam.admin.feature.chat.presentation.Res
 import com.twugteam.admin.feature.chat.presentation.no_chat_selected
 import com.twugteam.admin.feature.chat.presentation.select_a_chat
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -70,15 +81,19 @@ fun ChatDetailScreenRoot(
     viewModel: ChatDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
+    val messageListState = rememberLazyListState()
     val snackbarState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is ChatDetailEvent.OnChatLeft -> onBack()
             is ChatDetailEvent.OnError -> snackbarState.showSnackbar(event.error.asStringAsync())
             is ChatDetailEvent.OnNewMessage -> {
-
+                // Auto Scroll to Bottom
+                scope.launch {
+                    messageListState.animateScrollToItem(0)
+                }
             }
         }
     }
@@ -86,8 +101,6 @@ fun ChatDetailScreenRoot(
     LaunchedEffect(chatId) {
         viewModel.onAction(ChatDetailAction.OnSelectChat(chatId))
     }
-
-    val scope = rememberCoroutineScope()
 
     BackHandler(
         enabled = !isDetailScreenPresent
@@ -112,6 +125,7 @@ fun ChatDetailScreenRoot(
             }
             viewModel.onAction(action)
         },
+        messageListState = messageListState,
         snackbarHostState = snackbarState
     )
 }
@@ -121,16 +135,42 @@ private fun ChatDetailScreen(
     state: ChatDetailState,
     onAction: (ChatDetailAction) -> Unit,
     snackbarHostState: SnackbarHostState,
+    messageListState: LazyListState,
     isDetailScreenPresent: Boolean
 ) {
+    val density = LocalDensity.current
+    var headerHeight by remember { mutableStateOf(0.dp) }
+
     val currentDeviceConfiguration = getCurrentDeviceConfiguration()
-    val messageListState = rememberLazyListState()
 
     val realMessageItemCount = remember(state.messages) {
         state.messages
             .filter { it is MessageUi.LocalUserMessage || it is MessageUi.OtherUserMessage }
             .size
     }
+
+    // Auto Scroll to Bottom of the list
+    LaunchedEffect(messageListState) {
+        snapshotFlow {
+            messageListState.firstVisibleItemIndex to messageListState.layoutInfo.totalItemsCount
+        }.filter { (firstVisibleIndex, totalItemCount) ->
+            firstVisibleIndex >= 0 && totalItemCount > 0
+        }.collect { (firstVisibleIndex, _) ->
+            onAction(ChatDetailAction.OnFirstVisibleIndexChanged(firstVisibleIndex))
+        }
+    }
+
+    MessageBannerListener(
+        lazyListState = messageListState,
+        messages = state.messages,
+        isBannerVisible = state.bannerState.isVisible,
+        onShowBanner = { index ->
+            onAction(ChatDetailAction.OnScrollBannerIndexChanged(index))
+        },
+        onHide = {
+            onAction(ChatDetailAction.OnHideBanner)
+        }
+    )
 
     PaginationScrollListener(
         lazyListState = messageListState,
@@ -180,7 +220,14 @@ private fun ChatDetailScreen(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        ChatHeader {
+                        ChatHeader(
+                            modifier = Modifier
+                                .onSizeChanged {
+                                    headerHeight = with(density) {
+                                        it.height.toDp()
+                                    }
+                                }
+                        ) {
                             ChatDetailHeader(
                                 chatUi = state.chatUi,
                                 isDetailScreenPresent = isDetailScreenPresent,
@@ -269,6 +316,20 @@ private fun ChatDetailScreen(
                     }
                 }
             }
+            AnimatedVisibility(
+                visible = state.bannerState.isVisible,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = headerHeight + 16.dp)
+            ) {
+                if (state.bannerState.formattedDate != null) {
+                    DateChip(
+                        date = state.bannerState.formattedDate.asString()
+                    )
+                }
+            }
         }
     }
 }
@@ -352,6 +413,7 @@ private fun ChatDetailScreenPreview() {
             ),
             onAction = {},
             isDetailScreenPresent = true,
+            messageListState = rememberLazyListState(),
             snackbarHostState = remember { SnackbarHostState() }
         )
     }
