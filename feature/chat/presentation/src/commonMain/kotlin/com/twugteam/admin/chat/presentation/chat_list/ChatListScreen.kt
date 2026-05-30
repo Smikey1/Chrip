@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,7 +30,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twugteam.admin.chat.presentation.chat_list.components.ChatListHeader
 import com.twugteam.admin.chat.presentation.chat_list.components.ChatListItemUi
 import com.twugteam.admin.chat.presentation.components.EmptySection
-import com.twugteam.admin.chat.presentation.model.ChatUi
 import com.twugteam.admin.core.designsystem.components.buttons.ChripFloatingActionButton
 import com.twugteam.admin.core.designsystem.components.dialogs.DestructiveConfirmationDialog
 import com.twugteam.admin.core.designsystem.components.divider.ChirpHorizontalDivider
@@ -48,7 +48,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ChatListScreenRoot(
-    onChatClick: (ChatUi) -> Unit,
+    selectedChatId: String?,
+    onChatClick: (String?) -> Unit,
     onConfirmLogoutClick: () -> Unit,
     onCreateChatClick: () -> Unit,
     onProfileSettingClick: () -> Unit,
@@ -58,11 +59,15 @@ fun ChatListScreenRoot(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(selectedChatId){
+        viewModel.onAction(ChatListAction.OnSelectClick(selectedChatId))
+    }
+
     ChatListScreen(
         state = state,
         onAction = { action ->
             when (action) {
-                is ChatListAction.OnChatClick -> onChatClick(action.chat)
+                is ChatListAction.OnSelectClick -> onChatClick(action.chatId)
                 ChatListAction.OnConfirmLogoutClick -> onConfirmLogoutClick()
                 ChatListAction.OnCreateChatClick -> onCreateChatClick()
                 ChatListAction.OnProfileSettingCLick -> onProfileSettingClick()
@@ -158,7 +163,7 @@ private fun ChatListScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        onAction(ChatListAction.OnChatClick(chatUi))
+                                        onAction(ChatListAction.OnSelectClick(chatUi.chatId))
                                     }
                             )
                             ChirpHorizontalDivider()

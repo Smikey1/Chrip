@@ -9,5 +9,5 @@ sealed interface ChatListAction {
     data object OnConfirmLogoutClick : ChatListAction
     data object OnDismissLogoutDialog : ChatListAction
     data object OnCreateChatClick : ChatListAction
-    data class OnChatClick(val chat: ChatUi) : ChatListAction
+    data class OnSelectClick(val chatId: String?) : ChatListAction
 }

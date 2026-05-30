@@ -42,7 +42,7 @@ fun ChatListDetailAdaptiveScreen(
     val detailPane = scaffoldNavigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail]
     LaunchedEffect(detailPane, state.selectedChatId) {
         if (detailPane == PaneAdaptedValue.Hidden && state.selectedChatId != null) {
-            viewModel.onAction(ChatListDetailAction.OnChatClick(null))
+            viewModel.onAction(ChatListDetailAction.OnSelectClick(null))
         }
     }
 
@@ -65,6 +65,7 @@ fun ChatListDetailAdaptiveScreen(
     BackHandler(enabled = scaffoldNavigator.canNavigateBack()) {
         scope.launch {
             scaffoldNavigator.navigateBack()
+            viewModel.onAction(ChatListDetailAction.OnSelectClick(null))
         }
     }
 
@@ -76,8 +77,9 @@ fun ChatListDetailAdaptiveScreen(
         listPane = {
             AnimatedPane {
                 ChatListScreenRoot(
-                    onChatClick = { chatUi ->
-                        viewModel.onAction(ChatListDetailAction.OnChatClick(chatUi.chatId))
+                    selectedChatId = state.selectedChatId,
+                    onChatClick = { chatId ->
+                        viewModel.onAction(ChatListDetailAction.OnSelectClick(chatId))
 
                         scope.launch {
                             scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
@@ -120,7 +122,7 @@ fun ChatListDetailAdaptiveScreen(
         CreateChatScreenRoot(
             onChatCreated = { chat ->
                 viewModel.onAction(ChatListDetailAction.OnDismissClick)
-                viewModel.onAction(ChatListDetailAction.OnChatClick(chat.id))
+                viewModel.onAction(ChatListDetailAction.OnSelectClick(chat.id))
                 scope.launch {
                     scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                 }

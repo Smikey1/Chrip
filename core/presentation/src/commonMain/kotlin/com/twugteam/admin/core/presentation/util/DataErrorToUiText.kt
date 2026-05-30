@@ -14,6 +14,7 @@ import com.twugteam.admin.core.presentation.error_serialization
 import com.twugteam.admin.core.presentation.error_server
 import com.twugteam.admin.core.presentation.error_service_unavailable
 import com.twugteam.admin.core.presentation.error_too_many_requests
+import com.twugteam.admin.core.presentation.error_unable_to_send_message
 import com.twugteam.admin.core.presentation.error_unauthorized
 import com.twugteam.admin.core.presentation.error_unknown
 
@@ -35,6 +36,8 @@ fun DataError.toUiText(): UiText {
         DataError.Remote.SERVICE_UNAVAILABLE -> Res.string.error_service_unavailable
         DataError.Remote.SERIALIZATION -> Res.string.error_serialization
         DataError.Remote.UNKNOWN -> Res.string.error_unknown
+        DataError.Connection.NOT_CONNECTED -> Res.string.error_no_internet
+        DataError.Connection.MESSAGE_SEND_FAILED -> Res.string.error_unable_to_send_message
     }
     return UiText.Resource(resource)
 }

@@ -1,45 +1,95 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 
 package com.twugteam.admin.chat.presentation.chat_detail
 
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.twugteam.admin.chat.domain.chat.ChatRealTimeService
 import com.twugteam.admin.chat.domain.chat.ChatRepository
+import com.twugteam.admin.chat.domain.message.MessageRepository
+import com.twugteam.admin.chat.domain.models.ChatMessage
+import com.twugteam.admin.chat.domain.models.NetworkConnectionState
+import com.twugteam.admin.chat.domain.models.OutgoingNewMessage
 import com.twugteam.admin.chat.presentation.mappers.toUi
+import com.twugteam.admin.chat.presentation.mappers.toUiList
+import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.core.domain.auth.SessionStorage
+import com.twugteam.admin.core.domain.utils.DataErrorException
+import com.twugteam.admin.core.domain.utils.Paginator
 import com.twugteam.admin.core.domain.utils.onFailure
 import com.twugteam.admin.core.domain.utils.onSuccess
+import com.twugteam.admin.core.presentation.util.UiText
 import com.twugteam.admin.core.presentation.util.toUiText
+import com.twugteam.admin.feature.chat.presentation.Res
+import com.twugteam.admin.feature.chat.presentation.today
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
     private val sessionStorage: SessionStorage,
+    private val messageRepository: MessageRepository,
+    private val webSocketService: ChatRealTimeService
 ) : ViewModel() {
     private var hasLoadedInitialData = false
+
+    private var currentPaginator: Paginator<String?, ChatMessage>? = null
 
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
 
     private val _chatId = MutableStateFlow<String?>(null)
     private val _chatInfoFlow = _chatId
+        .onEach { chatId ->
+            if (chatId != null) {
+                setupPaginatorForChat(chatId)
+            } else {
+                currentPaginator = null
+            }
+
+        }
         .flatMapLatest { chatId ->
             if (chatId != null) {
                 chatRepository.getChatInfoById(chatId)
             } else emptyFlow()
         }
+
+    private val canSendMessage = snapshotFlow {
+        _state.value.messageTextFieldState.text.toString()
+    }.map {
+        it.isBlank()
+    }.combine(webSocketService.connectionState) { isMessageBlank, connectionState ->
+        !isMessageBlank && connectionState == NetworkConnectionState.CONNECTED
+    }
+
+    private fun observeCanSendMessage() {
+        canSendMessage.onEach { canSend ->
+            _state.update {
+                it.copy(
+                    canSendMessage = canSend
+                )
+            }
+        }.launchIn(viewModelScope)
+    }
+
 
     private val _state = MutableStateFlow(ChatDetailState())
 
@@ -53,6 +103,7 @@ class ChatDetailViewModel(
         }
         currentState.copy(
             chatUi = chatInfo.chat.toUi(authInfo.user.id),
+            messages = chatInfo.messages.toUiList(authInfo.user.id)
         )
     }
 
@@ -62,7 +113,9 @@ class ChatDetailViewModel(
         } else _state
     }.onStart {
         if (!hasLoadedInitialData) {
-
+            observeConnectionState()
+            observeChatMessages()
+            observeCanSendMessage()
             hasLoadedInitialData = true
         }
     }
@@ -79,7 +132,140 @@ class ChatDetailViewModel(
             ChatDetailAction.OnChatMembersClick -> onDismissChatOptionClick()
             ChatDetailAction.OnChatOptionsClick -> onChatOptionClick()
             ChatDetailAction.OnDismissChatOptions -> onDismissChatOptionClick()
+            ChatDetailAction.OnSendMessageClick -> sendMessage()
+            is ChatDetailAction.OnRetryClick -> onRetryMessageClick(action.message)
+            is ChatDetailAction.OnDeleteMessageClick -> onDeleteMessageClick(action.message)
+            ChatDetailAction.OnDismissMessageMenu -> onDismissMessageMenu()
+            is ChatDetailAction.OnMessageLongClick -> onMessageLongClick(action.message)
+            ChatDetailAction.OnScrollToTop -> onScrollToTop()
+            ChatDetailAction.OnPaginationRetryClick -> retryPagination()
+            ChatDetailAction.OnHideBanner -> hideBanner()
+            is ChatDetailAction.OnFirstVisibleIndexChanged -> autoScrollToBottom(action.index)
+            is ChatDetailAction.OnScrollBannerIndexChanged -> onScrollBannerIndexChanged(action.topVisibleIndex)
             else -> Unit
+        }
+    }
+
+    private fun autoScrollToBottom(index: Int) {
+        _state.update {
+            it.copy(
+                isNearBottomInMessageList = index <= 3
+            )
+        }
+    }
+
+    private fun onScrollBannerIndexChanged(topVisibleIndex: Int) {
+       val visibleDate = calculateBannerDateFromIndex(
+           messages = state.value.messages,
+           index = topVisibleIndex
+       )
+        _state.update {
+            it.copy(
+                bannerState = it.bannerState.copy(
+                    formattedDate = visibleDate,
+                    isVisible = visibleDate != null
+                )
+            )
+        }
+    }
+
+    private fun calculateBannerDateFromIndex(
+        messages: List<MessageUi>,
+        index: Int
+    ): UiText? {
+        if(messages.isEmpty() || index <=0 || index>= messages.size) {
+            return null
+        }
+        val nearestDateSeparator = (index until messages.size)
+            .asSequence()
+            .mapNotNull { index ->
+                val item = messages.getOrNull(index)
+                if(item is MessageUi.DateSeparator) item.date else null
+            }
+            .firstOrNull()
+
+        return when(nearestDateSeparator) {
+            is UiText.Resource -> {
+                if(nearestDateSeparator.resId == Res.string.today) null else nearestDateSeparator
+            } else -> nearestDateSeparator
+        }
+    }
+
+    private fun hideBanner(){
+        _state.update {
+            it.copy(
+                bannerState = it.bannerState.copy(isVisible = false)
+            )
+        }
+    }
+
+    private fun retryPagination() = loadNextItem()
+
+    private fun onScrollToTop() = loadNextItem()
+
+    private fun loadNextItem() {
+        viewModelScope.launch {
+            currentPaginator?.loadNextItem()
+        }
+    }
+
+    private fun onMessageLongClick(message: MessageUi.LocalUserMessage) {
+        _state.update {
+            it.copy(
+                messageWithMenuOpen = message
+            )
+        }
+    }
+
+    private fun onDismissMessageMenu() {
+        _state.update {
+            it.copy(
+                messageWithMenuOpen = null
+            )
+        }
+    }
+
+    private fun onDeleteMessageClick(message: MessageUi.LocalUserMessage) {
+        viewModelScope.launch {
+            messageRepository
+                .deleteMessage(message.id)
+                .onFailure { error ->
+                    eventChannel.send(ChatDetailEvent.OnError(error.toUiText()))
+                }
+        }
+    }
+
+    private fun onRetryMessageClick(message: MessageUi.LocalUserMessage) {
+        viewModelScope.launch {
+            messageRepository
+                .retryMessage(message.id)
+                .onFailure { error ->
+                    eventChannel.send(ChatDetailEvent.OnError(error.toUiText()))
+                }
+        }
+    }
+
+    private fun sendMessage() {
+        val currentChatId = _chatId.value
+        val messageContent = state.value.messageTextFieldState.text.toString().trim()
+        if (currentChatId == null || messageContent.isBlank()) {
+            return
+        }
+        viewModelScope.launch {
+            val message = OutgoingNewMessage(
+                chatId = currentChatId,
+                messageId = Uuid.random().toString(),
+                content = messageContent
+            )
+            messageRepository
+                .sendMessage(message)
+                .onSuccess {
+                    state.value.messageTextFieldState.clearText()
+                }
+                .onFailure { error ->
+                    state.value.messageTextFieldState.clearText()
+                    eventChannel.send(ChatDetailEvent.OnError(error.toUiText()))
+                }
         }
     }
 
@@ -106,6 +292,96 @@ class ChatDetailViewModel(
                 chatRepository.fetchChatById(chatId)
             }
         }
+    }
+
+    private fun observeChatMessages() {
+        val currentMessage = state
+            .map {
+                it.messages
+            }
+            .distinctUntilChanged()
+
+        val newMessagesList = _chatId
+            .flatMapLatest { chatId ->
+                if (chatId != null) {
+                    messageRepository.getMessageForChat(chatId)
+                } else emptyFlow()
+            }
+
+        val isNearBottom = state.map { it.isNearBottomInMessageList }.distinctUntilChanged()
+
+        combine(
+            currentMessage,
+            newMessagesList,
+            isNearBottom
+        ) { currentMessage, newMessages, isNearBottom ->
+            val lastCurrentMessageId = currentMessage.lastOrNull()?.id
+            val lastNewMessageId = newMessages.lastOrNull()?.message?.id
+            if (lastNewMessageId != lastCurrentMessageId && isNearBottom) {
+                eventChannel.send(ChatDetailEvent.OnNewMessage)
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun setupPaginatorForChat(chatId: String) {
+        currentPaginator = Paginator(
+            initialKey = null,
+            onLoadUpdated = { isLoading ->
+                _state.update {
+                    it.copy(
+                        isPaginationLoading = isLoading
+                    )
+                }
+
+            },
+            onRequest = { beforeTimestamp ->
+                messageRepository.fetchMessage(chatId, beforeTimestamp)
+            },
+            getNextKey = { messages ->
+                messages.minOfOrNull { it.createdAt }.toString()
+            },
+            onError = { throwable ->
+                if (throwable is DataErrorException) {
+//                    eventChannel.send(ChatDetailEvent.OnError(throwable.error.toUiText()))
+                    _state.update {
+                        it.copy(
+                            paginationError = throwable.error.toUiText()
+                        )
+                    }
+                }
+            },
+            onSuccess = { messages, _ ->
+                _state.update {
+                    it.copy(
+                        isPaginationEndReached = messages.isEmpty(),
+                        paginationError = null
+                    )
+                }
+            }
+        )
+        _state.update {
+            it.copy(
+                isPaginationEndReached = false,
+                isPaginationLoading = false
+            )
+        }
+    }
+
+    private fun observeConnectionState() {
+        webSocketService
+            .connectionState
+            .onEach { connectionState ->
+                if (connectionState == NetworkConnectionState.CONNECTED) {
+                    currentPaginator?.loadNextItem()
+                }
+
+                _state.update {
+                    it.copy(
+                        networkConnectionState = connectionState
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun onLeaveChatClick() {

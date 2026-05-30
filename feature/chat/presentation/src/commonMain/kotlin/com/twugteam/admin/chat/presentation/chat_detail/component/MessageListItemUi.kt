@@ -23,6 +23,7 @@ import com.twugteam.admin.core.presentation.util.UiText
 @Composable
 fun MessageListItemUi(
     messageUi: MessageUi,
+    messageWithMenuOpen: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: (MessageUi.LocalUserMessage) -> Unit,
@@ -46,7 +47,8 @@ fun MessageListItemUi(
                     onMessageLongClick = onMessageLongClick,
                     onDismissMessageMenu = onDismissMessageMenu,
                     onDeleteClick = { onDeleteClick(messageUi) },
-                    onRetryClick = { onRetryClick(messageUi) }
+                    onRetryClick = { onRetryClick(messageUi) },
+                    messageWithMenuOpen = messageWithMenuOpen,
                 )
             }
 
@@ -94,10 +96,10 @@ private fun MessageListItemUiPreview() {
             onRetryClick = {},
             onDeleteClick = {},
             onDismissMessageMenu = {},
+            messageWithMenuOpen = null,
             messageUi = MessageUi.LocalUserMessage(
                 id = "121",
                 content = "Hey",
-                isMenuOpen = false,
                 formattedSentTime = UiText.DynamicString("now"),
                 deliveryStatus = ChatMessageDeliveryStatus.FAILED
             )
