@@ -22,6 +22,7 @@ import com.twugteam.admin.chat.presentation.chat_detail.ChatDetailScreenRoot
 import com.twugteam.admin.chat.presentation.chat_list.ChatListScreenRoot
 import com.twugteam.admin.chat.presentation.create_chat.CreateChatScreenRoot
 import com.twugteam.admin.chat.presentation.manage_chat.ManageChatScreenRoot
+import com.twugteam.admin.chat.presentation.profile.ProfileScreenRoot
 import com.twugteam.admin.core.designsystem.theme.extended
 import com.twugteam.admin.core.presentation.util.DialogSheetScopedViewModel
 import kotlinx.coroutines.launch
@@ -141,6 +142,16 @@ fun ChatListDetailAdaptiveScreen(
             onMemberAdded = {
                 viewModel.onAction(ChatListDetailAction.OnDismissClick)
             },
+            onDismiss = {
+                viewModel.onAction(ChatListDetailAction.OnDismissClick)
+            }
+        )
+    }
+
+    DialogSheetScopedViewModel(
+        visible = state.dialogState is DialogState.Profile
+    ) {
+        ProfileScreenRoot(
             onDismiss = {
                 viewModel.onAction(ChatListDetailAction.OnDismissClick)
             }
