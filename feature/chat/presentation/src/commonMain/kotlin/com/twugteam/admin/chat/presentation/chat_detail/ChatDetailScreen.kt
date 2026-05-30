@@ -35,12 +35,15 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.chat.domain.models.ChatMessageDeliveryStatus
 import com.twugteam.admin.chat.presentation.chat_detail.component.ChatDetailHeader
 import com.twugteam.admin.chat.presentation.chat_detail.component.InputMessageBox
 import com.twugteam.admin.chat.presentation.chat_detail.component.MessageList
+import com.twugteam.admin.chat.presentation.chat_detail.component.PaginationScrollListener
 import com.twugteam.admin.chat.presentation.components.ChatHeader
 import com.twugteam.admin.chat.presentation.components.EmptySection
+import com.twugteam.admin.chat.presentation.model.ChatUi
 import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.core.designsystem.components.avatar.ChatParticipantUi
 import com.twugteam.admin.core.designsystem.theme.ChirpTheme
@@ -56,6 +59,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 @Composable
 fun ChatDetailScreenRoot(
@@ -97,7 +101,7 @@ fun ChatDetailScreenRoot(
         onBack()
     }
 
-    ChatDetailScreenRootScreen(
+    ChatDetailScreen(
         isDetailScreenPresent = isDetailScreenPresent,
         state = state,
         onAction = { action ->
@@ -113,7 +117,7 @@ fun ChatDetailScreenRoot(
 }
 
 @Composable
-private fun ChatDetailScreenRootScreen(
+private fun ChatDetailScreen(
     state: ChatDetailState,
     onAction: (ChatDetailAction) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -121,6 +125,22 @@ private fun ChatDetailScreenRootScreen(
 ) {
     val currentDeviceConfiguration = getCurrentDeviceConfiguration()
     val messageListState = rememberLazyListState()
+
+    val realMessageItemCount = remember(state.messages) {
+        state.messages
+            .filter { it is MessageUi.LocalUserMessage || it is MessageUi.OtherUserMessage }
+            .size
+    }
+
+    PaginationScrollListener(
+        lazyListState = messageListState,
+        itemCount = realMessageItemCount,
+        isPaginationLoading = state.isPaginationLoading,
+        isEndReached = state.isPaginationEndReached,
+        onNearTop = {
+            onAction(ChatDetailAction.OnScrollToTop)
+        }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -202,6 +222,11 @@ private fun ChatDetailScreenRootScreen(
                             onMessageLongClick = {
                                 onAction(ChatDetailAction.OnMessageLongClick(it))
                             },
+                            paginationError = state.paginationError?.asString(),
+                            isPaginationLoading = state.isPaginationLoading,
+                            onPaginationRetryClick = {
+                                onAction(ChatDetailAction.OnPaginationRetryClick)
+                            }
                         )
                         AnimatedVisibility(
                             visible = !currentDeviceConfiguration.isWideScreen
@@ -272,12 +297,38 @@ private fun DynamicRoundedCornerColumn(
 
 @Preview
 @Composable
-private fun ChatDetailScreenRootScreenPreview() {
+private fun ChatDetailScreenPreview() {
     ChirpTheme(
         isDarkTheme = true
     ) {
-        ChatDetailScreenRootScreen(
+        ChatDetailScreen(
             state = ChatDetailState(
+                chatUi = ChatUi(
+                    chatId = "123",
+                    localParticipant = ChatParticipantUi(
+                        userId = "343",
+                        username = "Kiran"
+                    ),
+                    otherParticipant = listOf(
+                        ChatParticipantUi(
+                            userId = "346",
+                            username = "Ram"
+                        ),
+                        ChatParticipantUi(
+                            userId = "345",
+                            username = "Dear"
+                        ),
+                    ),
+                    lastMessage = ChatMessage(
+                        id = "121",
+                        chatId = "123",
+                        senderId = "343",
+                        content = "Hey",
+                        createdAt = Clock.System.now(),
+                        deliveryStatus = ChatMessageDeliveryStatus.FAILED
+                    ),
+                    lastMessageSenderUsername = "Kiran"
+                ),
                 messages = (1..20).map {
                     if (it % 2 == 0) {
                         MessageUi.LocalUserMessage(

@@ -2,8 +2,6 @@ package com.twugteam.admin.core.domain.utils
 
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.newCoroutineContext
-import kotlin.coroutines.coroutineContext
 
 class Paginator<Key, Item>(
     private val initialKey: Key,
@@ -22,11 +20,10 @@ class Paginator<Key, Item>(
         if (isMakingRequest) {
             return
         }
-        if (currentKey != null && currentKey == lastRequestKey){
+        if (currentKey != null && currentKey == lastRequestKey) {
             return
         }
         isMakingRequest = true
-        lastRequestKey = currentKey
         onLoadUpdated(true)
 
         try {
@@ -34,12 +31,13 @@ class Paginator<Key, Item>(
                 .onSuccess { items ->
                     val newKey = getNextKey(items)
                     onSuccess(items, newKey)
+                    lastRequestKey = currentKey
                     currentKey = newKey
                 }.onFailure { error ->
                     onError(DataErrorException(error))
                 }
 
-        }catch (e: Exception){
+        } catch (e: Exception) {
             currentCoroutineContext().ensureActive()
             onError(e)
         } finally {
@@ -48,7 +46,7 @@ class Paginator<Key, Item>(
         }
     }
 
-    fun reset(){
+    fun reset() {
         currentKey = initialKey
         lastRequestKey = null
     }

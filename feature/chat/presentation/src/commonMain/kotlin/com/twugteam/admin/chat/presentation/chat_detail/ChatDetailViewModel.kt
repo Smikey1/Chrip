@@ -9,11 +9,11 @@ import androidx.lifecycle.viewModelScope
 import com.twugteam.admin.chat.domain.chat.ChatRealTimeService
 import com.twugteam.admin.chat.domain.chat.ChatRepository
 import com.twugteam.admin.chat.domain.message.MessageRepository
-import com.twugteam.admin.chat.domain.models.Chat
 import com.twugteam.admin.chat.domain.models.ChatMessage
 import com.twugteam.admin.chat.domain.models.NetworkConnectionState
 import com.twugteam.admin.chat.domain.models.OutgoingNewMessage
 import com.twugteam.admin.chat.presentation.mappers.toUi
+import com.twugteam.admin.chat.presentation.mappers.toUiList
 import com.twugteam.admin.chat.presentation.model.MessageUi
 import com.twugteam.admin.core.domain.auth.SessionStorage
 import com.twugteam.admin.core.domain.utils.DataErrorException
@@ -55,8 +55,8 @@ class ChatDetailViewModel(
 
     private val _chatId = MutableStateFlow<String?>(null)
     private val _chatInfoFlow = _chatId
-        .onEach {chatId ->
-            if(chatId != null){
+        .onEach { chatId ->
+            if (chatId != null) {
                 setupPaginatorForChat(chatId)
             } else {
                 currentPaginator = null
@@ -100,7 +100,7 @@ class ChatDetailViewModel(
         }
         currentState.copy(
             chatUi = chatInfo.chat.toUi(authInfo.user.id),
-            messages = chatInfo.messages.map { it.toUi(authInfo.user.id) }
+            messages = chatInfo.messages.toUiList(authInfo.user.id)
         )
     }
 
@@ -134,7 +134,19 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnDeleteMessageClick -> onDeleteMessageClick(action.message)
             ChatDetailAction.OnDismissMessageMenu -> onDismissMessageMenu()
             is ChatDetailAction.OnMessageLongClick -> onMessageLongClick(action.message)
+            ChatDetailAction.OnScrollToTop -> onScrollToTop()
+            ChatDetailAction.OnPaginationRetryClick -> retryPagination()
             else -> Unit
+        }
+    }
+
+    private fun retryPagination() = loadNextItem()
+
+    private fun onScrollToTop() = loadNextItem()
+
+    private fun loadNextItem() {
+        viewModelScope.launch {
+            currentPaginator?.loadNextItem()
         }
     }
 
@@ -252,7 +264,7 @@ class ChatDetailViewModel(
         }.launchIn(viewModelScope)
     }
 
-    private fun setupPaginatorForChat(chatId: String){
+    private fun setupPaginatorForChat(chatId: String) {
         currentPaginator = Paginator(
             initialKey = null,
             onLoadUpdated = { isLoading ->
@@ -263,21 +275,27 @@ class ChatDetailViewModel(
                 }
 
             },
-            onRequest = {beforeTimestamp ->
-                messageRepository.fetchMessage(chatId,beforeTimestamp)
+            onRequest = { beforeTimestamp ->
+                messageRepository.fetchMessage(chatId, beforeTimestamp)
             },
             getNextKey = { messages ->
                 messages.minOfOrNull { it.createdAt }.toString()
             },
-            onError = {throwable ->
-                if(throwable is DataErrorException){
-                    eventChannel.send(ChatDetailEvent.OnError(throwable.error.toUiText()))
+            onError = { throwable ->
+                if (throwable is DataErrorException) {
+//                    eventChannel.send(ChatDetailEvent.OnError(throwable.error.toUiText()))
+                    _state.update {
+                        it.copy(
+                            paginationError = throwable.error.toUiText()
+                        )
+                    }
                 }
             },
-            onSuccess = { messages, _->
+            onSuccess = { messages, _ ->
                 _state.update {
                     it.copy(
-                        isPaginationEndReached = messages.isEmpty()
+                        isPaginationEndReached = messages.isEmpty(),
+                        paginationError = null
                     )
                 }
             }
@@ -288,9 +306,6 @@ class ChatDetailViewModel(
                 isPaginationLoading = false
             )
         }
-        viewModelScope.launch {
-            currentPaginator?.loadNextItem()
-        }
     }
 
     private fun observeConnectionState() {
@@ -298,9 +313,7 @@ class ChatDetailViewModel(
             .connectionState
             .onEach { connectionState ->
                 if (connectionState == NetworkConnectionState.CONNECTED) {
-                    _chatId.value?.let { chatId ->
-                        messageRepository.fetchMessage(chatId, null)
-                    }
+                    currentPaginator?.loadNextItem()
                 }
 
                 _state.update {
