@@ -13,4 +13,5 @@ interface ChatParticipantRepository {
         mimeType: String
     ): EmptyResult<DataError.Remote>
 
+    suspend fun deleteProfilePicture(): EmptyResult<DataError.Remote>
 }

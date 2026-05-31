@@ -66,6 +66,9 @@ class ProfileViewModel(
     fun onAction(action: ProfileAction) {
         when (action) {
             ProfileAction.OnChangePasswordClick -> changePassword()
+            ProfileAction.OnDeletePictureClick -> showDeleteConfirmationDialog()
+            ProfileAction.OnDismissDeleteConfirmationDialogClick -> dismissDeleteConfirmationDialog()
+            ProfileAction.OnConfirmDeleteClick -> deleteProfilePicture()
             is ProfileAction.OnPictureSelected -> uploadProfilePicture(
                 action.bytes,
                 action.mimeType
@@ -88,6 +91,54 @@ class ProfileViewModel(
             }
 
             else -> {}
+        }
+    }
+
+    private fun dismissDeleteConfirmationDialog() {
+        _state.update {
+            it.copy(
+                showDeleteConfirmationDialog = false
+            )
+        }
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        _state.update {
+            it.copy(
+                showDeleteConfirmationDialog = true
+            )
+        }
+    }
+
+    private fun deleteProfilePicture() {
+        if(state.value.isDeletingImage && state.value.profilePictureUrl == null){
+            return
+        }
+        _state.update {
+            it.copy(
+                isDeletingImage = true,
+                imageError = null,
+                showDeleteConfirmationDialog = false
+            )
+        }
+        viewModelScope.launch {
+            chatParticipantRepository
+                .deleteProfilePicture()
+                .onSuccess {
+                    _state.update {
+                        it.copy(
+                            isDeletingImage = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            isDeletingImage = false,
+                            imageError = error.toUiText()
+                        )
+                    }
+                }
         }
     }
 
