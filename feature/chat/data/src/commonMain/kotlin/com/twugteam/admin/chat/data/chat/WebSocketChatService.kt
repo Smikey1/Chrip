@@ -107,7 +107,7 @@ class WebSocketChatService(
         )
 
         val authInfo = sessionStorage.observeAuthInfo().firstOrNull()
-        if (authInfo != null) {
+        if (authInfo != null && authInfo.user.id == messageDto.userId) {
             sessionStorage.setAuthInfo(
                 authInfo = authInfo.copy(
                     user = authInfo.user.copy(profilePictureUrl = messageDto.newUrl)

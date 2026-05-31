@@ -1,5 +1,6 @@
 package com.twugteam.admin.core.data.auth
 
+import com.twugteam.admin.core.data.dto.ChangePasswordRequest
 import com.twugteam.admin.core.data.dto.ForgotPasswordRequest
 import com.twugteam.admin.core.data.dto.LoginRequest
 import com.twugteam.admin.core.data.dto.RegisterRequest
@@ -28,6 +29,7 @@ class KtorAuthService(
         private const val VERIFY_EMAIL_ENDPOINT = "/auth/verify"
         private const val FORGOT_PASSWORD_ENDPOINT = "/auth/forgot-password"
         private const val RESET_PASSWORD_ENDPOINT = "/auth/reset-password"
+        private const val CHANGE_PASSWORD_ENDPOINT = "/auth/change-password"
     }
 
     override suspend fun register(
@@ -96,6 +98,19 @@ class KtorAuthService(
             body = ResetPasswordRequest(
                 newPassword = newPassword,
                 token = token
+            )
+        )
+    }
+
+    override suspend fun changePassword(
+        oldPassword: String,
+        newPassword: String
+    ): EmptyResult<DataError.Remote> {
+        return httpClient.post(
+            route = CHANGE_PASSWORD_ENDPOINT,
+            body = ChangePasswordRequest(
+                newPassword = newPassword,
+                oldPassword = oldPassword
             )
         )
     }
